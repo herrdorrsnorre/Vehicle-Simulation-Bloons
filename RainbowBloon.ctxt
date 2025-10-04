@@ -1,0 +1,7 @@
+#BlueJ class context
+comment0.target=RainbowBloon
+comment1.params=direction\ laneY
+comment1.target=RainbowBloon(int,\ int)
+comment2.params=
+comment2.target=void\ pop()
+numComments=3

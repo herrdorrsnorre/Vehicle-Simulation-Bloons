@@ -1,0 +1,22 @@
+#BlueJ class context
+comment0.target=Monkey
+comment1.params=
+comment1.target=Monkey()
+comment2.params=
+comment2.target=void\ act()
+comment3.params=
+comment3.target=void\ walkAcrossStreet()
+comment4.params=
+comment4.target=Bloon\ getNearestBloon()
+comment4.text=Locate\ nearest\ Bloon\ within\ range
+comment5.params=a
+comment5.target=double\ distanceTo(greenfoot.Actor)
+comment6.params=target
+comment6.target=void\ fireAt(Bloon)
+comment7.params=dmg
+comment7.target=void\ takeDamage(int)
+comment8.params=
+comment8.target=void\ die()
+comment9.params=
+comment9.target=void\ checkDeath()
+numComments=10

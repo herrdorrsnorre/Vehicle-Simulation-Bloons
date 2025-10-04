@@ -1,0 +1,7 @@
+#BlueJ class context
+comment0.target=PinkBloon
+comment1.params=direction\ laneY
+comment1.target=PinkBloon(int,\ int)
+comment2.params=
+comment2.target=java.lang.Class\ getChildTier()
+numComments=3

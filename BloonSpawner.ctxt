@@ -1,0 +1,10 @@
+#BlueJ class context
+comment0.target=BloonSpawner
+comment0.text=\r\n\ A\ BloonSpawner\ is\ a\ point\ where\ Bloons\ enter\ the\ track.\r\n\ It\ ensures\ spacing\ between\ Bloons.\r\n
+comment1.params=laneHeight\ laneNumber
+comment1.target=BloonSpawner(int,\ int)
+comment2.params=
+comment2.target=boolean\ isTouchingBloon()
+comment3.params=
+comment3.target=int\ getLaneNumber()
+numComments=4

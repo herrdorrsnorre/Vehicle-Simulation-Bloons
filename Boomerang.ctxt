@@ -1,0 +1,9 @@
+#BlueJ class context
+comment0.target=Boomerang
+comment1.params=source\ target
+comment1.target=Boomerang(Monkey,\ Bloon)
+comment2.params=
+comment2.target=void\ act()
+comment3.params=a
+comment3.target=double\ distanceTo(greenfoot.Actor)
+numComments=4
