@@ -6,6 +6,7 @@ public class BlackBloon extends Bloon {
     public BlackBloon(int direction, int laneY) {
         super(SPEED, 1, direction, laneY, PinkBloon.class); // direction = 1, nextTier handled by getChildTier
         setImage("Black_Bloon.png");
+        contactDamage = 2;
     }
 
     @Override

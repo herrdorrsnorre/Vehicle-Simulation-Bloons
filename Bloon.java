@@ -10,6 +10,7 @@ public abstract class Bloon extends SuperSmoothMover {
     protected int direction; // 1 = right, -1 = left
     protected int laneY;     // y-position of lane center
     protected int contactDamage = 1;
+    private int contactCooldown = 0; // frames until this bloon can hurt a monkey again
 
     public Bloon(double speed, int health, int direction, int laneY, Class<? extends Bloon> nextTier) {
         this.speed = speed;
@@ -68,12 +69,11 @@ protected void pop() {
         return null; // default: last tier
     }
 
-    /** Deal damage to monkey on contact but don’t pop immediately */
-    protected void checkCollisionWithMonkey() {
+   protected void checkCollisionWithMonkey() {
         Monkey monkey = (Monkey) getOneIntersectingObject(Monkey.class);
-        if (monkey != null) {
+        if (monkey != null && contactCooldown == 0) {
             monkey.takeDamage(contactDamage);
-            // DO NOT call pop() here — health controls that
+            contactCooldown = 30; // 0.5 seconds if game runs at 60 fps
         }
     }
 

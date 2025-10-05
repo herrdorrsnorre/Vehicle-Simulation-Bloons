@@ -2,53 +2,74 @@ import greenfoot.*;
 import java.util.List;
 
 public abstract class Monkey extends SuperSmoothMover {
-    protected int health = 5;
-    protected int range = 150;
-    protected int fireRate = 100; // frames between shots
-    protected int fireTimer = 0;
+    protected int health;
+    protected int range;
+    protected int fireRate; // frames between shots
+    protected int fireTimer;
     protected Class<? extends Projectile> projectileType;
 
-    // Pedestrian vertical movement
-    protected int speed = 2;      // vertical speed
-    protected int direction = 1;  // 1 = down, -1 = up
-
-    public Monkey() {
-        setRotation(0);
-    }
+    // Movement
+    protected int speed; // normal move speed
+    protected boolean waiting = false;
 
     @Override
     public void act() {
+        if (getWorld() == null) return;
+
         fireTimer++;
-        if (fireTimer >= fireRate) {
-            Bloon target = getNearestBloon();
-            if (target != null) {
-                fireAt(target);
-                fireTimer = 0;
-            }
+
+        // Detect if there are bloons ahead
+        boolean bloonsAhead = bloonsInFront();
+
+        if (bloonsAhead) {
+            waiting = true;
+            attackNearest();
+        } else {
+            waiting = false;
+            walkAcrossStreet();
         }
 
-        walkAcrossStreet();
         checkDeath();
-        /*Bloon target = getNearestBloon();
-if (target != null) {
-    turnTowards(target.getX(), target.getY());
-}
-*/
+        checkOutOfBounds();
     }
 
+    /** Returns true if there are any bloons roughly ahead within a certain distance. */
+    private boolean bloonsInFront() {
+        int lookDistance = 800; // how far ahead the monkey checks
+        int checkWidth = 150; // vertical tolerance for "in the way"
+
+        List<Bloon> bloons = getWorld().getObjects(Bloon.class);
+        for (Bloon b : bloons) {
+            double dx = b.getX() - getX();
+            double dy = Math.abs(b.getY() - getY());
+
+            if (dx > 0 && dx < lookDistance && dy < checkWidth) {
+                return true; // something ahead
+            }
+        }
+        return false;
+    }
+
+    /** Handles attacking logic */
+    private void attackNearest() {
+        Bloon target = getNearestBloon();
+        if (target != null && fireTimer >= fireRate) {
+            fireAt(target);
+            fireTimer = 0;
+        }
+    }
+
+    /** Move forward if coast is clear */
     private void walkAcrossStreet() {
-    if (getWorld() == null) return;
+        move(speed);
 
-    // Move horizontally in the direction of rotation
-    move(speed); // move() moves in the direction of setRotation()
-
-    // Remove monkey if it leaves the world horizontally
-    if (getX() < -getImage().getWidth()/2 || getX() > getWorld().getWidth() + getImage().getWidth()/2) {
-        getWorld().removeObject(this);
+        // Remove if off-screen
+        if (getX() < -getImage().getWidth()/2 || getX() > getWorld().getWidth() + getImage().getWidth()/2) {
+            getWorld().removeObject(this);
+        }
     }
-}
 
-    /** Locate nearest Bloon within range */
+    /** Find nearest Bloon within attack range */
     protected Bloon getNearestBloon() {
         List<Bloon> bloons = getObjectsInRange(range, Bloon.class);
         if (bloons.isEmpty()) return null;
@@ -95,6 +116,13 @@ if (target != null) {
 
     protected void checkDeath() {
         if (health <= 0 && getWorld() != null) {
+            getWorld().removeObject(this);
+        }
+    }
+        /** Remove if out of world bounds */
+    protected void checkOutOfBounds() {
+        if (getWorld() == null) return;
+        if (getX() < 0 || getX() > getWorld().getWidth()) {
             getWorld().removeObject(this);
         }
     }

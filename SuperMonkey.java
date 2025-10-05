@@ -4,7 +4,8 @@ public class SuperMonkey extends Monkey {
         range = 500;
         fireRate = 10; // shoots very fast
         projectileType = Dart.class; // or you can make a new Laser projectile
-        health = 30;
+        health = 15;
+        speed = 2;
         setImage("Super_Monkey.png");
     }
 }

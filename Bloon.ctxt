@@ -15,7 +15,6 @@ comment5.target=java.lang.Class\ getChildTier()
 comment5.text=Child\ tier\ class\ for\ next\ tier\ (override\ if\ needed)
 comment6.params=
 comment6.target=void\ checkCollisionWithMonkey()
-comment6.text=Deal\ damage\ to\ monkey\ on\ contact\ but\ don\u2019t\ pop\ immediately
 comment7.params=
 comment7.target=void\ checkOutOfBounds()
 comment7.text=Remove\ if\ out\ of\ world\ bounds

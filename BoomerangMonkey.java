@@ -5,6 +5,7 @@ public class BoomerangMonkey extends Monkey {
         fireRate = 45; // faster throwing
         projectileType = Boomerang.class;
         health = 10;
+        speed = 3;
         setImage("Boomerang_Monkey.png");
     }
 }

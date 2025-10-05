@@ -7,6 +7,7 @@ public class DartMonkey extends Monkey {
         fireRate = 50;
         projectileType = Dart.class;
         health = 5;
+        speed = 5;
         setImage("Dart_Monkey.png");
     }
     

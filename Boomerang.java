@@ -10,18 +10,26 @@ public class Boomerang extends Projectile {
     private Monkey source;
     private Set<Bloon> hitBloons = new HashSet<>();
     private int speed = 8;
-    private int pierce = 5; // how many bloons it can hit before disappearing
+    private int pierce = 5;
+
+    // Fallback position for when the source dies
+    private int fallbackX;
+    private int fallbackY;
 
     public Boomerang(Monkey source, Bloon target) {
         super(source, target);
         this.source = source;
         setImage("Boomerang.png");
         setRotation(0);
+
+        if (source != null) {
+            fallbackX = source.getX();
+            fallbackY = source.getY();
+        }
     }
 
     @Override
     public void act() {
-        // Move forward or return
         if (!returning) {
             move(speed);
             traveled += speed;
@@ -30,18 +38,24 @@ public class Boomerang extends Projectile {
                 hitBloons.clear();
             }
         } else {
-            if (source.getWorld() != null) {
-                turnTowards(source.getX(), source.getY());
-                move(speed);
+            // Update fallback position if source is still alive
+            if (source != null && source.getWorld() != null) {
+                fallbackX = source.getX();
+                fallbackY = source.getY();
+            }
 
-                if (distanceTo(source) < 5) {
-                    getWorld().removeObject(this);
-                    return;
-                }
+            // Move toward fallback point
+            turnTowards(fallbackX, fallbackY);
+            move(speed);
+
+            // Remove if close enough to fallback or out of bounds
+            if (distanceTo(fallbackX, fallbackY) < 5 || isOutOfBounds()) {
+                if (getWorld() != null) getWorld().removeObject(this);
+                return;
             }
         }
 
-        // Check for bloons
+        // Check for bloon collisions
         List<Bloon> bloons = getIntersectingObjects(Bloon.class);
         for (Bloon b : bloons) {
             if (!hitBloons.contains(b)) {
@@ -54,12 +68,18 @@ public class Boomerang extends Projectile {
                     return;
                 }
 
-                break; // only hit one bloon per act tick
+                break; // one hit per frame
             }
         }
     }
 
-    private double distanceTo(Actor a) {
-        return Math.hypot(getX() - a.getX(), getY() - a.getY());
+    private double distanceTo(int x, int y) {
+        return Math.hypot(getX() - x, getY() - y);
+    }
+
+    private boolean isOutOfBounds() {
+        World world = getWorld();
+        if (world == null) return true;
+        return getX() < 0 || getX() > world.getWidth() || getY() < 0 || getY() > world.getHeight();
     }
 }

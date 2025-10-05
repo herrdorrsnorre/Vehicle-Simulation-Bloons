@@ -2,10 +2,11 @@ import greenfoot.*;
 
 public class ZebraBloon extends Bloon {
     private static final double SPEED = 1.8;
-
+    
     public ZebraBloon(int direction, int laneY) {
         super(SPEED, 1, direction, laneY, null); // direction = 1, nextTier handled manually in pop
         setImage("Zebra_Bloon.png");
+        contactDamage = 3;
     }
 
     @Override

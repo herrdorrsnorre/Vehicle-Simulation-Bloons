@@ -57,9 +57,12 @@ private void spawnBloons() {
         else if (simulationTime < 1800) { allowedTiers.add(4); allowedTiers.add(1); allowedTiers.add(2); } // + Green
         else if (simulationTime < 2400) { allowedTiers.add(4); allowedTiers.add(1); allowedTiers.add(2); allowedTiers.add(3); } // + Yellow
         else if (simulationTime < 3000) { allowedTiers.add(4); allowedTiers.add(1); allowedTiers.add(2); allowedTiers.add(3); allowedTiers.add(0); } // + Pink
-        else { // everything unlocked progressively
-            for (int i = 0; i <= 8; i++) allowedTiers.add(i);
-        }
+        else if (simulationTime < 3600) {
+    for (int i = 0; i <= 8; i++) allowedTiers.add(i); // up to Rainbow
+    } else {
+        for (int i = 0; i <= 9; i++) allowedTiers.add(i); // now includes Ceramic
+    }
+
 
         int bloonType = allowedTiers.get(Greenfoot.getRandomNumber(allowedTiers.size()));
         Bloon b;
@@ -73,6 +76,7 @@ private void spawnBloons() {
             case 6: b = new BlackBloon(1, spawner.getY()); break;
             case 7: b = new ZebraBloon(1, spawner.getY()); break;
             case 8: b = new RainbowBloon(1, spawner.getY()); break;
+            case 9: b = new CeramicBloon(1, spawner.getY()); break;
             default: b = new RedBloon(1, spawner.getY()); break;
         }
 
