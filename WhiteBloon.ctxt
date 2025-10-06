@@ -3,5 +3,5 @@ comment0.target=WhiteBloon
 comment1.params=direction\ laneY
 comment1.target=WhiteBloon(int,\ int)
 comment2.params=
-comment2.target=java.lang.Class\ getChildTier()
+comment2.target=void\ pop()
 numComments=3

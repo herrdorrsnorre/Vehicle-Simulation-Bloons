@@ -165,7 +165,7 @@ public class BloonWorld extends World {
 
     int ySpawn;
     int yDespawn;
-    int sidewalkDepth = 30; // how far from road the monkeys start (increase for more distance)
+    int sidewalkDepth = 60; // how far from road the monkeys start (increase for more distance)
 
     if (spawnAtTop) {
         ySpawn = sidewalkTopEnd - sidewalkDepth;   // further back from road
