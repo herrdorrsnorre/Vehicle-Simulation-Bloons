@@ -31,6 +31,9 @@ public abstract class Monkey extends SuperSmoothMover {
 
         checkDeath();
         checkOutOfBounds();
+        if (despawnY != -1 && ((getRotation() == 90 && getY() >= despawnY) || (getRotation() == 270 && getY() <= despawnY))) {
+            getWorld().removeObject(this);
+        }
     }
 
     /** Returns true if there are any bloons roughly ahead within a certain distance. */
@@ -104,8 +107,14 @@ public abstract class Monkey extends SuperSmoothMover {
 
     public void takeDamage(int dmg) {
         health -= dmg;
+    
+        if (getWorld() != null) {
+            getWorld().addObject(new BloodEffect(), getX(), getY());
+        }
+    
         if (health <= 0) die();
     }
+
 
     protected void die() {
         World world = getWorld();
@@ -126,4 +135,6 @@ public abstract class Monkey extends SuperSmoothMover {
             getWorld().removeObject(this);
         }
     }
-}
+    private int despawnY = -1;
+    public void setDespawnY(int y) { despawnY = y; }
+    }
