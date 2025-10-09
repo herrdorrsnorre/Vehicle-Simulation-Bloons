@@ -55,6 +55,8 @@ public abstract class Monkey extends SuperSmoothMover {
 
     /** Handles attacking logic */
     private void attackNearest() {
+                if (projectileType == null) return; // no projectile monkey
+
         Bloon target = getNearestBloon();
         if (target != null && fireTimer >= fireRate) {
             fireAt(target);
@@ -64,6 +66,7 @@ public abstract class Monkey extends SuperSmoothMover {
 
     /** Move forward if coast is clear */
     private void walkAcrossStreet() {
+
         move(speed);
 
         // Remove if off-screen

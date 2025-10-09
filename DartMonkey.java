@@ -8,7 +8,9 @@ public class DartMonkey extends Monkey {
         projectileType = Dart.class;
         health = 5;
         speed = 5;
-        setImage("Dart_Monkey.png");
+        GreenfootImage monkey = new GreenfootImage("Dart_Monkey.png");
+        monkey.scale(67, 70);
+        setImage(monkey);
     }
     
 }

@@ -1,3 +1,5 @@
+import greenfoot.*;
+
 public class BoomerangMonkey extends Monkey {
 
     public BoomerangMonkey() {
@@ -6,7 +8,9 @@ public class BoomerangMonkey extends Monkey {
         projectileType = Boomerang.class;
         health = 10;
         speed = 3;
-        setImage("Boomerang_Monkey.png");
+        GreenfootImage monkey = new GreenfootImage("Boomerang_Monkey.png");
+        monkey.scale(89, 96);
+        setImage(monkey);
     }
 }
  

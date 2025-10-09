@@ -11,7 +11,9 @@ public class PopEffect extends Actor
     private int timer = 0; // counts frames
 
     {
-        setImage("Pop.png"); // make sure this file is in the images folder
+        GreenfootImage effect = new GreenfootImage("Pop.png");
+        effect.scale(100, 91);
+        setImage(effect);
         GreenfootSound pop = new GreenfootSound("Pop.mp3");
         pop.setVolume(30);
         pop.play();

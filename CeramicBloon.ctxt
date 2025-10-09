@@ -1,10 +1,11 @@
 #BlueJ class context
 comment0.target=CeramicBloon
-comment0.text=\r\n\ Write\ a\ description\ of\ class\ CeramicBloon\ here.\r\n\ \r\n\ @author\ (your\ name)\ \r\n\ @version\ (a\ version\ number\ or\ a\ date)\r\n
 comment1.params=direction\ laneY
 comment1.target=CeramicBloon(int,\ int)
 comment2.params=
 comment2.target=java.lang.Class\ getChildTier()
-comment3.params=dmg
-comment3.target=void\ takeDamage(int)
-numComments=4
+comment3.params=dmg\ type
+comment3.target=void\ takeDamage(int,\ DamageType)
+comment4.params=
+comment4.target=void\ pop()
+numComments=5

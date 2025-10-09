@@ -1,0 +1,9 @@
+#BlueJ class context
+comment0.target=LeadBloon
+comment1.params=direction\ laneY
+comment1.target=LeadBloon(int,\ int)
+comment2.params=
+comment2.target=void\ pop()
+comment3.params=dmg\ type
+comment3.target=void\ takeDamage(int,\ DamageType)
+numComments=4

@@ -14,7 +14,8 @@ public class Dart extends Projectile {
         // Only hit one bloon and then remove
         Bloon b = (Bloon) getOneIntersectingObject(Bloon.class);
         if (b != null) {
-            b.takeDamage(1);      // kill that bloon or reduce health
+            b.takeDamage(1, DamageType.NORMAL);
+             // kill that bloon or reduce health
             if (getWorld() != null) {
                 getWorld().removeObject(this);  // disappear immediately
             }

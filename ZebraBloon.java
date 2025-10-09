@@ -5,7 +5,9 @@ public class ZebraBloon extends Bloon {
     
     public ZebraBloon(int direction, int laneY) {
         super(SPEED, 1, direction, laneY, null); // direction = 1, nextTier handled manually in pop
-        setImage("Zebra_Bloon.png");
+        GreenfootImage bloon = new GreenfootImage("Zebra_Bloon.png");
+        bloon.scale(59, 78);
+        setImage(bloon);
         contactDamage = 3;
     }
 

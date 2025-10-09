@@ -1,0 +1,13 @@
+#BlueJ class context
+comment0.target=MagicProjectile
+comment1.params=source\ target
+comment1.target=MagicProjectile(Monkey,\ Bloon)
+comment2.params=
+comment2.target=void\ act()
+comment3.params=
+comment3.target=Bloon\ getNearestBloon()
+comment4.params=x1\ y1\ x2\ y2
+comment4.target=double\ getDistance(double,\ double,\ double,\ double)
+comment5.params=
+comment5.target=void\ checkCollision()
+numComments=6

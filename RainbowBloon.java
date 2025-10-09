@@ -5,7 +5,9 @@ public class RainbowBloon extends Bloon {
 
     public RainbowBloon(int direction, int laneY) {
         super(SPEED, 1, direction, laneY, null); // direction = 1, nextTier handled manually in pop
-        setImage("Rainbow_Bloon.png");
+        GreenfootImage bloon = new GreenfootImage("Rainbow_Bloon.png");
+        bloon.scale(63, 84);
+        setImage(bloon);
         contactDamage = 4;
     }
 

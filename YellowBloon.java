@@ -5,7 +5,9 @@ public class YellowBloon extends Bloon {
 
     public YellowBloon(int direction, int laneY) {
         super(SPEED, 1, direction, laneY, GreenBloon.class); // nextTier handled by getChildTier()
-        setImage("Yellow_Bloon.png");
+        GreenfootImage bloon = new GreenfootImage("Yellow_Bloon.png");
+        bloon.scale(59, 78);
+        setImage(bloon);
     }
 
 

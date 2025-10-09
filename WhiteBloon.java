@@ -5,7 +5,9 @@ public class WhiteBloon extends Bloon {
 
     public WhiteBloon(int direction, int laneY) {
         super(SPEED, 1, direction, laneY, null); // direction = 1, nextTier handled by getChildTier
-        setImage("White_Bloon.png");
+        GreenfootImage bloon = new GreenfootImage("White_Bloon.png");
+        bloon.scale(36, 48);
+        setImage(bloon);
         contactDamage = 2;
     }
     @Override

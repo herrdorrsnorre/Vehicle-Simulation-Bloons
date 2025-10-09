@@ -1,0 +1,9 @@
+#BlueJ class context
+comment0.target=BombProjectile
+comment1.params=source\ target
+comment1.target=BombProjectile(Monkey,\ Bloon)
+comment2.params=
+comment2.target=void\ checkCollision()
+comment3.params=
+comment3.target=void\ explode()
+numComments=4

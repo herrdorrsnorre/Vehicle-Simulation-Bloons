@@ -38,7 +38,7 @@ public abstract class Projectile extends Actor {
 
         Bloon b = (Bloon) getOneIntersectingObject(Bloon.class);
         if (b != null) {
-            b.takeDamage(1);
+            b.takeDamage(1, DamageType.NORMAL);
             hasHit = true; // mark that we've hit a bloon
             if (getWorld() != null) {
                 getWorld().removeObject(this);

@@ -5,7 +5,10 @@ public class BlackBloon extends Bloon {
 
     public BlackBloon(int direction, int laneY) {
         super(SPEED, 1, direction, laneY, null); // direction = 1, nextTier handled by getChildTier
-        setImage("Black_Bloon.png");
+        GreenfootImage bloon = new GreenfootImage("Black_Bloon.png");
+        bloon.scale(36, 48);
+        setImage(bloon);
+        
         contactDamage = 2;
     }
 
@@ -23,7 +26,7 @@ public class BlackBloon extends Bloon {
         int offset = 12;
         world.addObject(Pink1, x - offset, y);
         world.addObject(Pink2, x + offset, y);
-
+        PopEffect pop = new PopEffect();
         world.removeObject(this);
     }
  

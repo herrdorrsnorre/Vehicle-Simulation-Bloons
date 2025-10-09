@@ -4,25 +4,27 @@ import java.util.List;
 import java.util.Set;
 
 public class Boomerang extends Projectile {
-    private int maxDistance = 500;
+    private final int maxDistance = 500;
+    private final int speed = 8;
+    private final int basePierce = 5;
+
     private int traveled = 0;
+    private int pierce;
     private boolean returning = false;
     private Monkey source;
     private Set<Bloon> hitBloons = new HashSet<>();
-    private int speed = 8;
-    private int pierce = 5;
 
-    // Fallback position for when the source dies
     private int fallbackX;
     private int fallbackY;
 
     public Boomerang(Monkey source, Bloon target) {
         super(source, target);
         this.source = source;
+        this.pierce = basePierce;
         setImage("Boomerang.png");
-        setRotation(0);
 
         if (source != null) {
+            setRotation(source.getRotation());
             fallbackX = source.getX();
             fallbackY = source.getY();
         }
@@ -30,56 +32,51 @@ public class Boomerang extends Projectile {
 
     @Override
     public void act() {
+        if (getWorld() == null) return;
+
         if (!returning) {
             move(speed);
             traveled += speed;
+
             if (traveled >= maxDistance) {
                 returning = true;
-                hitBloons.clear();
+                hitBloons.clear(); // reset pierce for return phase
             }
         } else {
-            // Update fallback position if source is still alive
+            // Update fallback in case monkey moved or died
             if (source != null && source.getWorld() != null) {
                 fallbackX = source.getX();
                 fallbackY = source.getY();
             }
 
-            // Move toward fallback point
             turnTowards(fallbackX, fallbackY);
             move(speed);
 
-            // Remove if close enough to fallback or out of bounds
-            if (distanceTo(fallbackX, fallbackY) < 5 || isOutOfBounds()) {
-                if (getWorld() != null) getWorld().removeObject(this);
+            if (distanceTo(fallbackX, fallbackY) < speed + 2) {
+                getWorld().removeObject(this);
                 return;
             }
         }
 
-        // Check for bloon collisions
+        checkHits();
+    }
+
+    private void checkHits() {
         List<Bloon> bloons = getIntersectingObjects(Bloon.class);
         for (Bloon b : bloons) {
             if (!hitBloons.contains(b)) {
-                b.takeDamage(1);
+                b.takeDamage(1, DamageType.NORMAL);
                 hitBloons.add(b);
                 pierce--;
-
-                if (pierce <= 0 && getWorld() != null) {
-                    getWorld().removeObject(this);
+                if (pierce <= 0) {
+                    if (getWorld() != null) getWorld().removeObject(this);
                     return;
                 }
-
-                break; // one hit per frame
             }
         }
     }
 
     private double distanceTo(int x, int y) {
         return Math.hypot(getX() - x, getY() - y);
-    }
-
-    private boolean isOutOfBounds() {
-        World world = getWorld();
-        if (world == null) return true;
-        return getX() < 0 || getX() > world.getWidth() || getY() < 0 || getY() > world.getHeight();
     }
 }
