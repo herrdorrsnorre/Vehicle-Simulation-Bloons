@@ -19,8 +19,8 @@ public class WhiteBloon extends Bloon {
         int y = getY();
 
         // Spawn Black and White Bloons slightly offset horizontally
-        PinkBloon Pink1 = new PinkBloon(1, laneY);
-        PinkBloon Pink2 = new PinkBloon(1, laneY);
+        PinkBloon Pink1 = new PinkBloon(direction, laneY);
+        PinkBloon Pink2 = new PinkBloon(direction, laneY);
 
         int offset = 12;
         world.addObject(Pink1, x - offset, y);

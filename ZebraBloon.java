@@ -20,8 +20,8 @@ public class ZebraBloon extends Bloon {
         int y = getY();
 
         // Spawn Black and White Bloons slightly offset horizontally
-        BlackBloon black = new BlackBloon(1, laneY);
-        WhiteBloon white = new WhiteBloon(1, laneY);
+        BlackBloon black = new BlackBloon(direction, laneY);
+        WhiteBloon white = new WhiteBloon(direction, laneY);
 
         int offset = 12;
         world.addObject(black, x - offset, y);

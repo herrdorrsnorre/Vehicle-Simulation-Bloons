@@ -21,8 +21,8 @@ public class RainbowBloon extends Bloon {
 
         // Spawn 2 Zebra Bloons slightly offset horizontally
         int offset = 12;
-        ZebraBloon zebra1 = new ZebraBloon(1, laneY);
-        ZebraBloon zebra2 = new ZebraBloon(1, laneY);
+        ZebraBloon zebra1 = new ZebraBloon(direction, laneY);
+        ZebraBloon zebra2 = new ZebraBloon(direction, laneY);
 
         world.addObject(zebra1, x - offset, y);
         world.addObject(zebra2, x + offset, y);

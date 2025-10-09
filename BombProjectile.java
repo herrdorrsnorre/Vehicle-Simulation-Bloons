@@ -2,7 +2,7 @@ import greenfoot.*;
 import java.util.List;
 
 public class BombProjectile extends Projectile {
-    private int explosionRadius = 100;
+    private int explosionRadius = 175;
 
     public BombProjectile(Monkey source, Bloon target) {
         super(source, target);

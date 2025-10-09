@@ -27,7 +27,15 @@ public void setTemporaryImmunity(DamageType type, boolean active) {
         this.direction = direction;
         this.laneY = laneY;
         this.nextTier = nextTier;
-        setRotation(direction == 1 ? 0 : 180);
+   // Do not rotate bloons — just flip if moving left
+if (direction == -1) {
+    GreenfootImage img = getImage();
+    if (img != null) {
+        img.mirrorHorizontally(); // ✅ horizontal flip, not vertical
+        setImage(img);
+    }
+}
+
     }
 
     @Override
@@ -125,7 +133,7 @@ protected void pop() {
 
 
     public boolean isImmuneTo(DamageType type) {
-        if (this instanceof LeadBloon && (type != DamageType.EXPLOSIVE && type != DamageType.ICE && type != DamageType.MAGIC)) return true;
+        if (this instanceof LeadBloon && (type != DamageType.EXPLOSIVE)) return true;
         if (this instanceof WhiteBloon && type == DamageType.ICE) return true;
         if (this instanceof ZebraBloon && type == DamageType.ICE) return true;
         if (this instanceof BlackBloon && type == DamageType.EXPLOSIVE) return true;

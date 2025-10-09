@@ -53,8 +53,8 @@ public class CeramicBloon extends Bloon {
         int y = getY();
 
         // Spawn Black and White Bloons slightly offset horizontally
-        RainbowBloon rainbow = new RainbowBloon(1, laneY);
-        RainbowBloon rainbow2 = new RainbowBloon(1, laneY);
+        RainbowBloon rainbow = new RainbowBloon(direction, laneY);
+        RainbowBloon rainbow2 = new RainbowBloon(direction, laneY);
 
         int offset = 12;
         world.addObject(rainbow, x - offset, y);

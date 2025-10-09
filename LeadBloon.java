@@ -18,8 +18,8 @@ public class LeadBloon extends Bloon {
         int y = getY();
 
         // Spawn Black and White Bloons slightly offset horizontally
-        BlackBloon Black1 = new BlackBloon(1, laneY);
-        BlackBloon Black2 = new BlackBloon(1, laneY);
+        BlackBloon Black1 = new BlackBloon(direction, laneY);
+        BlackBloon Black2 = new BlackBloon(direction, laneY);
 
         int offset = 12;
         world.addObject(Black1, x - offset, y);

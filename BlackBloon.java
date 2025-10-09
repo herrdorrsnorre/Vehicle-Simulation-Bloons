@@ -20,8 +20,8 @@ public class BlackBloon extends Bloon {
         int x = getX();
         int y = getY();
 
-        PinkBloon Pink1 = new PinkBloon(1, laneY);
-        PinkBloon Pink2 = new PinkBloon(1, laneY);
+        PinkBloon Pink1 = new PinkBloon(direction, laneY);
+        PinkBloon Pink2 = new PinkBloon(direction, laneY);
 
         int offset = 12;
         world.addObject(Pink1, x - offset, y);

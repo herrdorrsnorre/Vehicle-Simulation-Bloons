@@ -19,7 +19,7 @@ public class BloonWorld extends World {
 
     private int spawnTimer = 0;
     private int simulationTime = 0;
-    private static final int BASE_MONKEY_INTERVAL = 40;
+    private static final int BASE_MONKEY_INTERVAL = 80;
     private static final int BASE_BLOON_INTERVAL = 240;
     private int[] laneSpawnTimers = new int[laneCount];
     private int monkeySpawnTimer = 0;
@@ -66,7 +66,7 @@ public class BloonWorld extends World {
         sidewalkTopEnd = 232 - 10;
         sidewalkBottomStart = lanePositionsY[laneCount - 1] + (laneHeight / 2) + 10;
         sidewalkBottomEnd = sidewalkBottomStart + 80;
-        
+        //enableDevMode(CeramicBloon.class, BombTower.class);
     }
 
     public void act() {
@@ -77,80 +77,80 @@ public class BloonWorld extends World {
     }
 
 private void spawnBloons() {
+    // --- DEV MODE ---
+    if (devMode && devBloon != null) {
+        bloonSpawnTimer++;
+        if (bloonSpawnTimer < BASE_BLOON_INTERVAL) return;
+        bloonSpawnTimer = 0;
+
+        // Spawn the dev bloon in ALL lanes
+        for (int lane = 0; lane < laneCount; lane++) {
+            BloonSpawner spawner = laneSpawners[lane];
+            int direction = (lane < 3) ? -1 : 1;
+            int startX = (direction == 1) ? 1 : getWidth() - 1;
+
+            try {
+                Bloon b = devBloon
+                    .getConstructor(int.class, int.class)
+                    .newInstance(direction, spawner.getY());
+                addObject(b, startX, spawner.getY());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return;
+    }
+
+    // --- NORMAL SPAWNING ---
     simulationTime++;
 
-    // Loop through lanes independently
     for (int lane = 0; lane < laneCount; lane++) {
         BloonSpawner spawner = laneSpawners[lane];
-
-        // Increment this lane's cooldown timer
         laneSpawnTimers[lane]++;
 
-        // Random chance to attempt spawn (adjust probability as needed)
-        if (Greenfoot.getRandomNumber(100) < 2) { // ~2% chance per tick
-            // Only spawn if the lane cooldown is satisfied
-            if (laneSpawnTimers[lane] >= 30 && !spawner.isTouchingBloon()) { 
-                laneSpawnTimers[lane] = 0; // reset this lane's cooldown
+        if (Greenfoot.getRandomNumber(100) < 2) { // random chance to spawn
+            if (laneSpawnTimers[lane] >= 30 && !spawner.isTouchingBloon()) {
+                laneSpawnTimers[lane] = 0;
 
-                // Pick bloon type dynamically based on simulationTime (slower ramp)
-ArrayList<Integer> allowedTiers = new ArrayList<>();
+                // --- Determine allowed tiers based on simulation time ---
+                ArrayList<Integer> allowedTiers = new ArrayList<>();
+                if (simulationTime < 600) allowedTiers.add(0);
+                else if (simulationTime < 1100) { for (int i = 0; i <= 1; i++) allowedTiers.add(i); }
+                else if (simulationTime < 1700) { for (int i = 0; i <= 2; i++) allowedTiers.add(i); }
+                else if (simulationTime < 2300) { for (int i = 0; i <= 3; i++) allowedTiers.add(i); }
+                else if (simulationTime < 2900) { for (int i = 0; i <= 4; i++) allowedTiers.add(i); }
+                else if (simulationTime < 4100) { for (int i = 0; i <= 6; i++) allowedTiers.add(i); }
+                else if (simulationTime < 5400) { for (int i = 0; i <= 8; i++) allowedTiers.add(i); }
+                else if (simulationTime < 6000) { for (int i = 0; i <= 10; i++) allowedTiers.add(i); }
+                else { for (int i = 0; i <= 11; i++) allowedTiers.add(i); }
 
-if (simulationTime < 600) {              // first ~13s at 60fps
-    allowedTiers.add(0);                  // Red only
-} else if (simulationTime < 1100) {      // next ~13s
-    allowedTiers.add(0);                 // Red
-    allowedTiers.add(1);                 // Blue
-} else if (simulationTime < 1700) {
-    allowedTiers.add(0);                 // Red
-    allowedTiers.add(1);                 // Blue
-    allowedTiers.add(2);                 // Green
-} else if (simulationTime < 2300) {
-    for (int i = 0; i <= 3; i++) allowedTiers.add(i); // Red → Yellow
-    
-} 
-else if (simulationTime < 2900) {
-    for (int i = 0; i <= 4; i++) allowedTiers.add(i); // Red → Pink
-    
-}else if (simulationTime < 4100) {
-    for (int i = 0; i <= 6; i++) allowedTiers.add(i); // Red → White
-} else if (simulationTime < 5400) {
-    for (int i = 0; i <= 8; i++) allowedTiers.add(i); // Red → Lead
-} else if (simulationTime < 6000) {
-    for (int i = 0; i <= 10; i++) allowedTiers.add(i); // Red → Zebra
-} else if (simulationTime < 6600) {
-    for (int i = 0; i <= 11; i++) allowedTiers.add(i); // Red → Rainbow
-} else {
-    for (int i = 0; i <= 11; i++) allowedTiers.add(i); // All types
-}
+                int bloonType = allowedTiers.get(Greenfoot.getRandomNumber(allowedTiers.size()));
 
-// Pick a random bloon from the allowed tiers
-int bloonType = allowedTiers.get(Greenfoot.getRandomNumber(allowedTiers.size()));
-Bloon b;
+                int direction = (lane < 3) ? -1 : 1;
+                int startX = (direction == 1) ? 1 : getWidth() - 1;
 
-
+                Bloon b;
                 switch (bloonType) {
-                    case 0: b = new RedBloon(1, spawner.getY()); break;
-                    case 1: b = new BlueBloon(1, spawner.getY()); break;
-                    case 2: b = new GreenBloon(1, spawner.getY()); break;
-                    case 3: b = new YellowBloon(1, spawner.getY()); break;
-                    case 4: b = new PinkBloon(1, spawner.getY()); break;
-                    case 5: b = new BlackBloon(1, spawner.getY()); break;
-                    case 6: b = new WhiteBloon(1, spawner.getY()); break;
-                    case 7: b = new PurpleBloon(1, spawner.getY()); break;
-                    case 8: b = new LeadBloon(1, spawner.getY()); break;
-                    case 9: b = new ZebraBloon(1, spawner.getY()); break;
-                    case 10: b = new RainbowBloon(1, spawner.getY()); break;
-                    case 11: b = new CeramicBloon(1, spawner.getY()); break;
-                    default: b = new RedBloon(1, spawner.getY()); break;
+                    case 0: b = new RedBloon(direction, spawner.getY()); break;
+                    case 1: b = new BlueBloon(direction, spawner.getY()); break;
+                    case 2: b = new GreenBloon(direction, spawner.getY()); break;
+                    case 3: b = new YellowBloon(direction, spawner.getY()); break;
+                    case 4: b = new PinkBloon(direction, spawner.getY()); break;
+                    case 5: b = new BlackBloon(direction, spawner.getY()); break;
+                    case 6: b = new WhiteBloon(direction, spawner.getY()); break;
+                    case 7: b = new PurpleBloon(direction, spawner.getY()); break;
+                    case 8: b = new LeadBloon(direction, spawner.getY()); break;
+                    case 9: b = new ZebraBloon(direction, spawner.getY()); break;
+                    case 10: b = new RainbowBloon(direction, spawner.getY()); break;
+                    case 11: b = new CeramicBloon(direction, spawner.getY()); break;
+                    default: b = new RedBloon(direction, spawner.getY()); break;
                 }
 
-
-                addObject(b, 0, spawner.getY());
+                addObject(b, startX, spawner.getY());
             }
         }
     }
 }
-
 
     // --- Spawn Monkeys ---
     private void spawnMonkeys() {

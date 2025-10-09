@@ -10,7 +10,7 @@ public class IceBlastEffect extends Actor {
     public IceBlastEffect() {
         for (int i = 0; i < FRAME_COUNT; i++) {
             GreenfootImage img = new GreenfootImage("ice/Ice" + (i + 1) + ".png");
-            img.scale((int)(img.getWidth() * 2.2), (int)(img.getHeight() * 2.2)); // much larger visual radius
+            img.scale(250, 250); // much larger visual radius
             frames[i] = img;
         }
         setImage(frames[0]);
