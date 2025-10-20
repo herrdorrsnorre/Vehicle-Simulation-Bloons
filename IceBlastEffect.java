@@ -15,7 +15,7 @@ public class IceBlastEffect extends Actor {
         }
         setImage(frames[0]);
 
-        GreenfootSound sound = new GreenfootSound("IceEffectSound.mp3");
+        GreenfootSound sound = new GreenfootSound("IceEffectSound.wav");
         sound.setVolume(35);
         sound.play();
     }

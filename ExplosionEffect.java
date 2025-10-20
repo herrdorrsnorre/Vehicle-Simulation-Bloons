@@ -13,7 +13,7 @@ public class ExplosionEffect extends Actor {
             frames[i] = new GreenfootImage("explosion/explosion" + (i + 1) + ".png");
         }
         setImage(frames[0]);
-        GreenfootSound sound = new GreenfootSound("explosion.mp3");
+        GreenfootSound sound = new GreenfootSound("explosion.wav");
         sound.setVolume(50);
         sound.play();
     }

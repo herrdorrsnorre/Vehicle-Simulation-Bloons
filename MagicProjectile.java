@@ -73,28 +73,28 @@ public class MagicProjectile extends Projectile {
         if (bloons == null || bloons.isEmpty()) return;
 
         for (Bloon b : bloons) {
-    if (b == null) continue;
-
-    if (b.isImmuneTo(DamageType.MAGIC)) {
-        // Hit an immune bloon → play sound and destroy projectile
-        GreenfootSound immuneSound = new GreenfootSound("PurpleSound.mp3");
-        immuneSound.setVolume(40);
-        immuneSound.play();
-
-        if (getWorld() != null) {
-            world.removeObject(this);
-            return;
+            if (b == null) continue;
+        
+            if (b.isImmuneTo(DamageType.MAGIC)) {
+                // Hit an immune bloon → play sound and destroy projectile
+                GreenfootSound immuneSound = new GreenfootSound("PurpleSound.wav");
+                immuneSound.setVolume(40);
+                immuneSound.play();
+        
+                if (getWorld() != null) {
+                    world.removeObject(this);
+                    return;
+                }
+            } else {
+                // Normal damage
+                b.takeDamage(1, DamageType.MAGIC);
+                pierce--;
+                if (pierce <= 0 && getWorld() != null) {
+                    world.removeObject(this);
+                    return;
+                }
+            }
         }
-    } else {
-        // Normal damage
-        b.takeDamage(1, DamageType.MAGIC);
-        pierce--;
-        if (pierce <= 0 && getWorld() != null) {
-            world.removeObject(this);
-            return;
-        }
-    }
-}
 
     }
 }

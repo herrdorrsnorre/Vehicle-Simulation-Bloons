@@ -58,18 +58,31 @@ public class Boomerang extends Projectile {
             }
         }
 
-        checkHits();
+        checkCollision();
     }
-
-    private void checkHits() {
+    @Override
+    protected void checkCollision() {
+        World world = getWorld();
+        if (world == null) return;
         List<Bloon> bloons = getIntersectingObjects(Bloon.class);
+        if (bloons == null || bloons.isEmpty()) return;
         for (Bloon b : bloons) {
-            if (!hitBloons.contains(b)) {
+            if (b == null || hitBloons.contains(b)) continue;
+    
+            // Check immunity first
+            if (b.isImmuneTo(DamageType.NORMAL)) {
+                // Immune bloon hit — just remove projectile
+                if (getWorld() != null) {
+                    world.removeObject(this);
+                    return;
+                }
+            } else {
+                // Normal damage
                 b.takeDamage(1, DamageType.NORMAL);
                 hitBloons.add(b);
                 pierce--;
-                if (pierce <= 0) {
-                    if (getWorld() != null) getWorld().removeObject(this);
+                if (pierce <= 0 && getWorld() != null) {
+                    world.removeObject(this);
                     return;
                 }
             }

@@ -14,7 +14,7 @@ public class PopEffect extends Actor
         GreenfootImage effect = new GreenfootImage("Pop.png");
         effect.scale(100, 91);
         setImage(effect);
-        GreenfootSound pop = new GreenfootSound("Pop.mp3");
+        GreenfootSound pop = new GreenfootSound("Pop.wav");
         pop.setVolume(30);
         pop.play();
     }

@@ -28,7 +28,7 @@ public class CeramicBloon extends Bloon {
     public void takeDamage(int dmg, DamageType type) {
         
         health -= dmg;
-        GreenfootSound Ceramic = new GreenfootSound("CeramicSound.mp3");
+        GreenfootSound Ceramic = new GreenfootSound("CeramicSound.wav");
         Ceramic.setVolume(30);
         Ceramic.play();
         if (health <= 0) {

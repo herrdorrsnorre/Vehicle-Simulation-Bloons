@@ -13,7 +13,7 @@ public class BloodEffect extends Actor {
             frames[i] = new GreenfootImage("blood/Blood" + (i + 1) + ".png");
         }
         setImage(frames[0]);
-        GreenfootSound hit = new GreenfootSound("hit.mp3");
+        GreenfootSound hit = new GreenfootSound("hit.wav");
         hit.play();
     }
 
