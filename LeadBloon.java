@@ -7,6 +7,7 @@ public class LeadBloon extends Bloon {
         GreenfootImage bloon = new GreenfootImage("Lead_Bloon.png");
         bloon.scale(63, 84);
         setImage(bloon);
+        contactDamage = 3;
     }
 
     @Override

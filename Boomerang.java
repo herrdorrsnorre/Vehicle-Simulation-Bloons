@@ -16,7 +16,7 @@ public class Boomerang extends Projectile {
 
     private int fallbackX;
     private int fallbackY;
-
+    
     public Boomerang(Monkey source, Bloon target) {
         super(source, target);
         this.source = source;
@@ -28,6 +28,7 @@ public class Boomerang extends Projectile {
             fallbackX = source.getX();
             fallbackY = source.getY();
         }
+        
     }
 
     @Override
@@ -72,6 +73,9 @@ public class Boomerang extends Projectile {
             // Check immunity first
             if (b.isImmuneTo(DamageType.NORMAL)) {
                 // Immune bloon hit — just remove projectile
+                GreenfootSound immuneSound = new GreenfootSound("LeadSound.wav");
+                immuneSound.setVolume(40);
+                immuneSound.play();
                 if (getWorld() != null) {
                     world.removeObject(this);
                     return;
