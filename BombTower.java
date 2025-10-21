@@ -12,5 +12,6 @@ public class BombTower extends Monkey {
         GreenfootImage monkey = new GreenfootImage("Bomb_Tower.png");
         monkey.scale(67, 70);
         setImage(monkey);
+        
     }
 }

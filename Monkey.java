@@ -7,15 +7,21 @@ public abstract class Monkey extends SuperSmoothMover {
     protected int fireRate; // frames between shots
     protected int fireTimer;
     protected Class<? extends Projectile> projectileType;
-
+    
     // Movement
     protected int speed; // normal move speed
-    protected boolean waiting = false;
+    protected int moveDirection = 1; // 1 = downward (90°), -1 = upward (270°)
 
+    protected boolean waiting = false;
+    private boolean initialized = false;
     @Override
     public void act() {
         if (getWorld() == null) return;
-
+        if (!initialized) {
+            int r = getRotation();
+            moveDirection = (r >= 180) ? -1 : 1;
+            initialized = true;
+        }
         fireTimer++;
 
         // Detect if there are bloons ahead
@@ -67,10 +73,14 @@ public abstract class Monkey extends SuperSmoothMover {
 
     /** Move forward if coast is clear */
     private void walkAcrossStreet() {
-        if (speed > 0)
-            setRotation(90);
-        else
-            setRotation(180);
+        // Determine lane direction: 90° (down) or 270° (up)
+        // So they don’t get stuck after shooting
+        if (!waiting) {
+            // ensure they face their walking direction again
+            if (moveDirection == -1) setRotation(270); // bottom→top
+            else setRotation(90); // top→bottom
+        }
+
         move(speed);
 
         // Remove if off-screen
