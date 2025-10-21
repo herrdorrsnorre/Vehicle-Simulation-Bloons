@@ -55,10 +55,11 @@ public abstract class Monkey extends SuperSmoothMover {
 
     /** Handles attacking logic */
     private void attackNearest() {
-                if (projectileType == null) return; // no projectile monkey
+        if (projectileType == null) return; // no projectile monkey
 
         Bloon target = getNearestBloon();
         if (target != null && fireTimer >= fireRate) {
+            faceTarget(target);
             fireAt(target);
             fireTimer = 0;
         }
@@ -66,7 +67,10 @@ public abstract class Monkey extends SuperSmoothMover {
 
     /** Move forward if coast is clear */
     private void walkAcrossStreet() {
-
+        if (speed > 0)
+            setRotation(90);
+        else
+            setRotation(180);
         move(speed);
 
         // Remove if off-screen
@@ -138,6 +142,19 @@ public abstract class Monkey extends SuperSmoothMover {
             getWorld().removeObject(this);
         }
     }
+    /** Rotates the image to face the target, but keeps its movement direction unchanged */
+    private void faceTarget(Bloon target) {
+        if (target == null) return;
+    
+        // Calculate angle to target
+        double dx = target.getX() - getX();
+        double dy = target.getY() - getY();
+        int angle = (int) Math.toDegrees(Math.atan2(dy, dx));
+    
+        // Set rotation for aiming visuals only
+        setRotation(angle);
+    }
+
     private int despawnY = -1;
     public void setDespawnY(int y) { despawnY = y; }
     }
