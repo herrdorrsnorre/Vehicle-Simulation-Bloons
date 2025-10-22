@@ -4,7 +4,7 @@ public class BoomerangMonkey extends Monkey {
 
     public BoomerangMonkey() {
         range = 500;
-        fireRate = 45; // faster throwing
+        fireRate = 45; 
         projectileType = Boomerang.class;
         health = 10;
         speed = 3;

@@ -29,7 +29,7 @@ public class CeramicBloon extends Bloon {
         
         health -= dmg;
         GreenfootSound Ceramic = new GreenfootSound("CeramicSound.wav");
-        Ceramic.setVolume(30);
+        Ceramic.setVolume(75);
         Ceramic.play();
         if (health <= 0) {
             pop();

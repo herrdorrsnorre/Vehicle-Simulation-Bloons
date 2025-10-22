@@ -80,7 +80,8 @@ public void act() {
         }
     }
 
-    world.addObject(new IceBlastEffect(), getX(), getY());
+    world.addObject(new IceBlastEffect(freezeRange), getX(), getY());
+
 }
 
 }

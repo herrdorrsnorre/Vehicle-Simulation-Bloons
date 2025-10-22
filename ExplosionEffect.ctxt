@@ -1,7 +1,8 @@
 #BlueJ class context
 comment0.target=ExplosionEffect
-comment1.params=
-comment1.target=ExplosionEffect()
+comment1.params=radius
+comment1.target=ExplosionEffect(int)
+comment1.text=\r\n\ @param\ radius\ The\ explosion\ radius\ (used\ to\ determine\ visual\ size)\r\n
 comment2.params=
 comment2.target=void\ act()
 numComments=3

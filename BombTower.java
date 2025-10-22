@@ -7,7 +7,7 @@ public class BombTower extends Monkey {
         range = 300;
         projectileType = BombProjectile.class;
         health = 8;
-        speed = 2;
+        speed = 1;
 
         GreenfootImage monkey = new GreenfootImage("Bomb_Tower.png");
         monkey.scale(67, 70);

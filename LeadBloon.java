@@ -33,7 +33,7 @@ public class LeadBloon extends Bloon {
         if (isImmuneTo(type)) {
         // Play a sound for hitting an immune bloon
         GreenfootSound immuneSound = new GreenfootSound("LeadSound.wav"); // replace with your sound
-        immuneSound.setVolume(40);
+        immuneSound.setVolume(75);
         immuneSound.play();
         return; // no damage applied
     }

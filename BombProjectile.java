@@ -29,7 +29,7 @@ public class BombProjectile extends Projectile {
                 b.takeDamage(1, DamageType.EXPLOSIVE);
             }
         }
-        getWorld().addObject(new ExplosionEffect(), getX(), getY());
+        getWorld().addObject(new ExplosionEffect(explosionRadius), getX(), getY());
         getWorld().removeObject(this);
     }
 }
