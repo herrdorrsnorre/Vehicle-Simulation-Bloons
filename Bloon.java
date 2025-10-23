@@ -13,7 +13,7 @@ public abstract class Bloon extends SuperSmoothMover {
     private int contactCooldown = 0; // frames until this bloon can hurt a monkey again
     private boolean frozen = false;
     private int freezeTimer = 0;
-    private GreenfootImage originalImage;
+    protected GreenfootImage originalImage;
     // temporary immunity tracker
     private java.util.EnumMap<DamageType, Boolean> tempImmunities = new java.util.EnumMap<>(DamageType.class);
     
@@ -173,5 +173,19 @@ public abstract class Bloon extends SuperSmoothMover {
     
         setImage(frozenImg);
     }
+    
+protected void updateImageDirection() {
+    if (originalImage == null) return;
+    GreenfootImage img = new GreenfootImage(originalImage);
+    if (direction == -1) { // facing left
+        img.mirrorHorizontally();
+    }
+    setImage(img);
+}
+
+public void setDirection(int newDirection) {
+    direction = newDirection;
+    updateImageDirection();
+}
 
 }

@@ -18,6 +18,8 @@ public class Moab extends Bloon {
         super(SPEED, MAX_HEALTH, direction, laneY, null);
         setImage(DAMAGE_IMAGES[0]);
         contactDamage = 100;
+        originalImage = new GreenfootImage(getImage());
+        updateImageDirection(); 
     }
 
     @Override
@@ -34,6 +36,8 @@ public class Moab extends Bloon {
         int stage = Math.min(STAGE_COUNT - 1, (MAX_HEALTH - health) / 40);
         if (stage != lastDamageStage) {
             setImage(DAMAGE_IMAGES[stage]);
+            originalImage = new GreenfootImage(getImage());
+            updateImageDirection();
             lastDamageStage = stage;
         }
     }
@@ -46,11 +50,11 @@ public class Moab extends Bloon {
         int x = getX();
         int y = getY();
 
-        int offset = 18;
-        world.addObject(new CeramicBloon(direction, laneY), x - offset * 2, y);
-        world.addObject(new CeramicBloon(direction, laneY), x - offset, y);
-        world.addObject(new CeramicBloon(direction, laneY), x, y);
-        world.addObject(new CeramicBloon(direction, laneY), x + offset, y);
+        //int offset = 30;
+        world.addObject(new CeramicBloon(direction, laneY), x - 30, y);
+        world.addObject(new CeramicBloon(direction, laneY), x - 10, y);
+        world.addObject(new CeramicBloon(direction, laneY), x + 10, y);
+        world.addObject(new CeramicBloon(direction, laneY), x + 30, y);
         GreenfootSound Ceramic = new GreenfootSound("moabpop.wav");
         Ceramic.setVolume(75);
         Ceramic.play();
