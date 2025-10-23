@@ -201,7 +201,7 @@ public abstract class Bloon extends SuperSmoothMover {
         if (frontBloon != null && frontBloon != this) {
             if (frontBloon instanceof Moab) {
                 // Slow down to match front bloon's speed
-                this.speed = Math.max(frontBloon.speed, this.speed * 0.5);
+                this.speed = Math.max(frontBloon.speed, this.speed * 0.97);
     
                 // Attempt lane change if not already changing
                 if (!changingLane) tryLaneChange();
@@ -243,7 +243,7 @@ public abstract class Bloon extends SuperSmoothMover {
         if (currentLane == -1) return; // couldn't find lane
     
         // Check upward and downward lanes for free space
-        int[] offsets = {-1, 1};
+        int[] offsets = {-2, -1, 1, 2};
         for (int offset : offsets) {
             int newLane = currentLane + offset;
             if (newLane < 0 || newLane >= lanes.length) continue;
