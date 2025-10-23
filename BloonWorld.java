@@ -66,7 +66,7 @@ public class BloonWorld extends World {
         sidewalkTopEnd = 232 - 10;
         sidewalkBottomStart = lanePositionsY[laneCount - 1] + (laneHeight / 2) + 10;
         sidewalkBottomEnd = sidewalkBottomStart + 80;
-        //enableDevMode(CeramicBloon.class, BombTower.class);
+        enableDevMode(Moab.class, SuperMonkey.class);
     }
 
     public void act() {

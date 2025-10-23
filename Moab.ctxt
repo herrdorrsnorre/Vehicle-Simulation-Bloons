@@ -1,7 +1,7 @@
 #BlueJ class context
-comment0.target=CeramicBloon
+comment0.target=Moab
 comment1.params=direction\ laneY
-comment1.target=CeramicBloon(int,\ int)
+comment1.target=Moab(int,\ int)
 comment2.params=dmg\ type
 comment2.target=void\ takeDamage(int,\ DamageType)
 comment3.params=

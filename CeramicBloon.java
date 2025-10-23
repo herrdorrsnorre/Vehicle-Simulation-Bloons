@@ -14,14 +14,9 @@ public class CeramicBloon extends Bloon {
     }
 
     public CeramicBloon(int direction, int laneY) {
-        super(SPEED, 10, direction, laneY, PinkBloon.class);
+        super(SPEED, 10, direction, laneY, null);
         setImage(DAMAGE_IMAGES[0]);
         contactDamage = 5;
-    }
-
-    @Override
-    protected Class<? extends Bloon> getChildTier() {
-        return RainbowBloon.class;
     }
 
     @Override
