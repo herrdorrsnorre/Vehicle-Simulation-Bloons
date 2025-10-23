@@ -49,16 +49,19 @@ public class Moab extends Bloon {
 
         int x = getX();
         int y = getY();
-
-        //int offset = 30;
+        GreenfootSound Ceramic = new GreenfootSound("moabpop.wav");
+        Ceramic.setVolume(75);
+        Ceramic.play();
         world.addObject(new CeramicBloon(direction, laneY), x - 30, y);
         world.addObject(new CeramicBloon(direction, laneY), x - 10, y);
         world.addObject(new CeramicBloon(direction, laneY), x + 10, y);
         world.addObject(new CeramicBloon(direction, laneY), x + 30, y);
-        GreenfootSound Ceramic = new GreenfootSound("moabpop.wav");
-        Ceramic.setVolume(75);
-        Ceramic.play();
+        
         world.addObject(new PopEffect(), x, y);
         world.removeObject(this);
+    }
+    @Override
+    public void applyFreeze(int duration) {
+    
     }
 }

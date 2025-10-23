@@ -16,7 +16,10 @@ public abstract class Bloon extends SuperSmoothMover {
     protected GreenfootImage originalImage;
     // temporary immunity tracker
     private java.util.EnumMap<DamageType, Boolean> tempImmunities = new java.util.EnumMap<>(DamageType.class);
-    
+    protected boolean changingLane = false;
+    protected int targetLaneY;
+    protected double laneChangeSpeed = 2.0; // pixels per frame
+
     public void setTemporaryImmunity(DamageType type, boolean active) {
         tempImmunities.put(type, active);
     }
@@ -51,6 +54,7 @@ public abstract class Bloon extends SuperSmoothMover {
             }
         }
 
+        handleTrafficLogic();
         move(speed * direction);
         checkCollisionWithMonkey();
         checkOutOfBounds();
@@ -173,19 +177,91 @@ public abstract class Bloon extends SuperSmoothMover {
     
         setImage(frozenImg);
     }
-    
-protected void updateImageDirection() {
-    if (originalImage == null) return;
-    GreenfootImage img = new GreenfootImage(originalImage);
-    if (direction == -1) { // facing left
-        img.mirrorHorizontally();
+        
+    protected void updateImageDirection() {
+        if (originalImage == null) return;
+        GreenfootImage img = new GreenfootImage(originalImage);
+        if (direction == -1) { // facing left
+            img.mirrorHorizontally();
+        }
+        setImage(img);
     }
-    setImage(img);
-}
-
-public void setDirection(int newDirection) {
-    direction = newDirection;
-    updateImageDirection();
-}
+    
+    public void setDirection(int newDirection) {
+        direction = newDirection;
+        updateImageDirection();
+    }
+    protected void handleTrafficLogic() {
+        if (getWorld() == null) return;
+    
+        // Detect bloons ahead in the same lane and direction
+        int lookAhead = 100; // distance ahead to check
+        Bloon frontBloon = getBloonAhead(lookAhead);
+    
+        if (frontBloon != null && frontBloon != this) {
+            if (frontBloon instanceof Moab) {
+                // Slow down to match front bloon's speed
+                this.speed = Math.max(frontBloon.speed, this.speed * 0.5);
+    
+                // Attempt lane change if not already changing
+                if (!changingLane) tryLaneChange();
+            } 
+        } else {
+            // No one blocking us — return to normal speed
+            this.speed = Math.abs(speed);
+        }
+    
+        // Smoothly move toward target lane if changing
+        if (changingLane) {
+            int dy = targetLaneY - getY();
+            if (Math.abs(dy) < 2) {
+                changingLane = false; // reached new lane
+            } else {
+                setLocation(getX(), getY() + (int) Math.signum(dy) * laneChangeSpeed);
+            }
+        }
+    }
+    
+    private Bloon getBloonAhead(int distance) {
+        return (Bloon) getOneObjectAtOffset(direction * distance, 0, Bloon.class);
+    }
+    
+    protected void tryLaneChange() {
+        BloonWorld world = (BloonWorld) getWorld();
+        int[] lanes = world.getLanePositions(); // add getter in BloonWorld (see below)
+        int currentY = laneY;
+    
+        // Find our lane index
+        int currentLane = -1;
+        for (int i = 0; i < lanes.length; i++) {
+            if (Math.abs(lanes[i] - currentY) < 5) {
+                currentLane = i;
+                break;
+            }
+        }
+    
+        if (currentLane == -1) return; // couldn't find lane
+    
+        // Check upward and downward lanes for free space
+        int[] offsets = {-1, 1};
+        for (int offset : offsets) {
+            int newLane = currentLane + offset;
+            if (newLane < 0 || newLane >= lanes.length) continue;
+    
+            // Ensure lane goes in same direction
+            boolean sameDirection = (newLane < 3 && direction == -1) || (newLane >= 3 && direction == 1);
+            if (!sameDirection) continue;
+    
+            // Check if lane is clear
+            java.util.List<Bloon> laneBloons = world.getObjectsAt(getX(), lanes[newLane], Bloon.class);
+            if (laneBloons.isEmpty()) {
+                // Begin smooth lane change
+                targetLaneY = lanes[newLane];
+                changingLane = true;
+                laneY = targetLaneY; // update logical lane
+                return;
+            }
+        }
+    }
 
 }

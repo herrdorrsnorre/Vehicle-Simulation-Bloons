@@ -6,4 +6,6 @@ comment2.params=dmg\ type
 comment2.target=void\ takeDamage(int,\ DamageType)
 comment3.params=
 comment3.target=void\ pop()
-numComments=4
+comment4.params=duration
+comment4.target=void\ applyFreeze(int)
+numComments=5

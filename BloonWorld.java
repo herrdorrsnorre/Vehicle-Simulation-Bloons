@@ -33,19 +33,16 @@ public class BloonWorld extends World {
 
     // --- Developer testing features ---
     private boolean devMode = false;  // toggle developer mode
-    private Class<? extends Bloon> devBloon;  // type of bloon to spawn
+    private Class<? extends Bloon> devBloon1;
+    private Class<? extends Bloon> devBloon2;
     private Class<? extends Monkey> devMonkey; // type of monkey to spawn
 
-    public void enableDevMode(Class<? extends Bloon> bloonType, Class<? extends Monkey> monkeyType) {
+    // Now supports two different Bloon types at once.
+    public void enableDevMode(Class<? extends Bloon> bloonType1, Class<? extends Bloon> bloonType2, Class<? extends Monkey> monkeyType) {
         devMode = true;
-        devBloon = bloonType;
+        devBloon1 = bloonType1;
+        devBloon2 = bloonType2;
         devMonkey = monkeyType;
-    }
-
-    public void disableDevMode() {
-        devMode = false;
-        devBloon = null;
-        devMonkey = null;
     }
 
     public BloonWorld() {
@@ -66,7 +63,7 @@ public class BloonWorld extends World {
         sidewalkTopEnd = 232 - 10;
         sidewalkBottomStart = lanePositionsY[laneCount - 1] + (laneHeight / 2) + 10;
         sidewalkBottomEnd = sidewalkBottomStart + 80;
-        enableDevMode(Moab.class, SuperMonkey.class);
+        //enableDevMode(Moab.class, PinkBloon.class, DartMonkey.class);
     }
 
     public void act() {
@@ -75,25 +72,30 @@ public class BloonWorld extends World {
         spawnMonkeys();
         zSort((ArrayList<Actor>) getObjects(Actor.class), this);
     }
-
 private void spawnBloons() {
     // --- DEV MODE ---
-    if (devMode && devBloon != null) {
+    if (devMode && (devBloon1 != null || devBloon2 != null)) {
         bloonSpawnTimer++;
         if (bloonSpawnTimer < BASE_BLOON_INTERVAL) return;
         bloonSpawnTimer = 0;
 
-        // Spawn the dev bloon in ALL lanes
+        // Spawn dev bloons in ALL lanes
         for (int lane = 0; lane < laneCount; lane++) {
             BloonSpawner spawner = laneSpawners[lane];
             int direction = (lane < 3) ? -1 : 1;
             int startX = (direction == 1) ? 1 : getWidth() - 1;
 
             try {
-                Bloon b = devBloon
-                    .getConstructor(int.class, int.class)
-                    .newInstance(direction, spawner.getY());
-                addObject(b, startX, spawner.getY());
+                // Randomly pick between devBloon1 and devBloon2 each spawn
+                Class<? extends Bloon> bloonClass =
+                    (Greenfoot.getRandomNumber(2) == 0 ? devBloon1 : devBloon2);
+
+                if (bloonClass != null) {
+                    Bloon b = bloonClass
+                        .getConstructor(int.class, int.class)
+                        .newInstance(direction, spawner.getY());
+                    addObject(b, startX, spawner.getY());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -104,11 +106,30 @@ private void spawnBloons() {
     // --- NORMAL SPAWNING ---
     simulationTime++;
 
+    // --- MOAB SPAWN HANDLING ---
+    boolean moabExists = !getObjects(Moab.class).isEmpty();
+    boolean shouldTrySpawnMoab = simulationTime > 6000 && Greenfoot.getRandomNumber(800) == 0;
+
+    if (!moabExists && shouldTrySpawnMoab) {
+        // Spawn a single MOAB in a random lane
+        int lane = Greenfoot.getRandomNumber(laneCount);
+        BloonSpawner spawner = laneSpawners[lane];
+        int direction = (lane < 3) ? -1 : 1;
+        int startX = (direction == 1) ? 1 : getWidth() - 1;
+
+        addObject(new Moab(direction, spawner.getY()), startX, spawner.getY());
+        return; // stop all other spawns this frame
+    }
+
+    // --- SLOW DOWN NORMAL BLOONS WHEN MOAB EXISTS ---
+    int baseChance = 2;
+    int spawnChance = moabExists ? 1 : baseChance; // 1 = 1% chance per lane per frame
+
     for (int lane = 0; lane < laneCount; lane++) {
         BloonSpawner spawner = laneSpawners[lane];
         laneSpawnTimers[lane]++;
 
-        if (Greenfoot.getRandomNumber(100) < 2) { // random chance to spawn
+        if (Greenfoot.getRandomNumber(100) < spawnChance) {
             if (laneSpawnTimers[lane] >= 30 && !spawner.isTouchingBloon()) {
                 laneSpawnTimers[lane] = 0;
 
@@ -235,165 +256,168 @@ private void spawnBloons() {
         m.setDespawnY(yDespawn);
     }
 
-
-
-// Lane preparation with textured sidewalks
-public int[] prepareLanes(World world, GreenfootImage target, BloonSpawner[] spawners,
-                           int startY, int heightPerLane, int lanes, int spacing) {
-    int[] lanePositions = new int[lanes];
-    int heightOffset = heightPerLane / 2;
-
-    // --- Adjustable constants ---
-    int sidewalkThickness = 80; // thicker sidewalks
-    Color SIDEWALK_BASE = new Color(160, 160, 160);
-    Color SIDEWALK_LINE = new Color(140, 140, 140);
-    Color SIDEWALK_CRACK = new Color(120, 120, 120);
-
-    // --- Draw top textured sidewalk ---
-    target.setColor(SIDEWALK_BASE);
-    target.fillRect(0, startY - sidewalkThickness, target.getWidth(), sidewalkThickness);
-
-    // Add light texture (lines/cracks)
-    target.setColor(SIDEWALK_LINE);
-    for (int x = 0; x < target.getWidth(); x += 60) {
-        target.fillRect(x, startY - sidewalkThickness, 2, sidewalkThickness);
+    
+    
+    // Lane preparation with textured sidewalks
+    public int[] prepareLanes(World world, GreenfootImage target, BloonSpawner[] spawners,
+                               int startY, int heightPerLane, int lanes, int spacing) {
+        int[] lanePositions = new int[lanes];
+        int heightOffset = heightPerLane / 2;
+    
+        // --- Adjustable constants ---
+        int sidewalkThickness = 80; // thicker sidewalks
+        Color SIDEWALK_BASE = new Color(160, 160, 160);
+        Color SIDEWALK_LINE = new Color(140, 140, 140);
+        Color SIDEWALK_CRACK = new Color(120, 120, 120);
+    
+        // --- Draw top textured sidewalk ---
+        target.setColor(SIDEWALK_BASE);
+        target.fillRect(0, startY - sidewalkThickness, target.getWidth(), sidewalkThickness);
+    
+        // Add light texture (lines/cracks)
+        target.setColor(SIDEWALK_LINE);
+        for (int x = 0; x < target.getWidth(); x += 60) {
+            target.fillRect(x, startY - sidewalkThickness, 2, sidewalkThickness);
+        }
+        for (int y = startY - sidewalkThickness; y < startY; y += 20) {
+            target.fillRect(0, y, target.getWidth(), 1);
+        }
+        target.setColor(SIDEWALK_CRACK);
+        for (int x = 30; x < target.getWidth(); x += 120) {
+            target.fillRect(x, startY - sidewalkThickness + 10, 1, 20);
+        }
+    
+        // --- Draw lanes + dividers ---
+        target.setColor(GREY_BORDER);
+        target.fillRect(0, startY, target.getWidth(), spacing);
+    
+        for (int i = 0; i < lanes; i++) {
+            lanePositions[i] = startY + spacing + (i * (heightPerLane + spacing)) + heightOffset;
+    
+            target.setColor(GREY_PATH);
+            target.fillRect(0, lanePositions[i] - heightOffset, target.getWidth(), heightPerLane);
+    
+            spawners[i] = new BloonSpawner(heightPerLane, i);
+            world.addObject(spawners[i], 0, lanePositions[i]);
+    
+            // Dashed dividers between lanes
+            if (i > 0) {
+                for (int j = 0; j < target.getWidth(); j += 120) {
+                    target.setColor(Color.WHITE);
+                    target.fillRect(j, lanePositions[i] - heightOffset - spacing, 60, spacing);
+                }
+            }
+        }
+    
+        // --- Draw bottom textured sidewalk ---
+        int lastLaneBottom = lanePositions[lanes - 1] + heightOffset + spacing;
+        target.setColor(SIDEWALK_BASE);
+        target.fillRect(0, lastLaneBottom, target.getWidth(), sidewalkThickness);
+    
+        target.setColor(SIDEWALK_LINE);
+        for (int x = 0; x < target.getWidth(); x += 60) {
+            target.fillRect(x, lastLaneBottom, 2, sidewalkThickness);
+        }
+        for (int y = lastLaneBottom; y < lastLaneBottom + sidewalkThickness; y += 20) {
+            target.fillRect(0, y, target.getWidth(), 1);
+        }
+        target.setColor(SIDEWALK_CRACK);
+        for (int x = 30; x < target.getWidth(); x += 120) {
+            target.fillRect(x, lastLaneBottom + 10, 1, 20);
+        }
+    
+        // Border above and below roads
+        target.setColor(GREY_BORDER);
+        target.fillRect(0, startY - 3, target.getWidth(), 6);
+        target.fillRect(0, lastLaneBottom - spacing, target.getWidth(), 6);
+    
+        return lanePositions;
     }
-    for (int y = startY - sidewalkThickness; y < startY; y += 20) {
-        target.fillRect(0, y, target.getWidth(), 1);
-    }
-    target.setColor(SIDEWALK_CRACK);
-    for (int x = 30; x < target.getWidth(); x += 120) {
-        target.fillRect(x, startY - sidewalkThickness + 10, 1, 20);
-    }
-
-    // --- Draw lanes + dividers ---
-    target.setColor(GREY_BORDER);
-    target.fillRect(0, startY, target.getWidth(), spacing);
-
-    for (int i = 0; i < lanes; i++) {
-        lanePositions[i] = startY + spacing + (i * (heightPerLane + spacing)) + heightOffset;
-
-        target.setColor(GREY_PATH);
-        target.fillRect(0, lanePositions[i] - heightOffset, target.getWidth(), heightPerLane);
-
-        spawners[i] = new BloonSpawner(heightPerLane, i);
-        world.addObject(spawners[i], 0, lanePositions[i]);
-
-        // Dashed dividers between lanes
-        if (i > 0) {
-            for (int j = 0; j < target.getWidth(); j += 120) {
-                target.setColor(Color.WHITE);
-                target.fillRect(j, lanePositions[i] - heightOffset - spacing, 60, spacing);
+    
+    
+    
+    /**
+     * Z-sort so actors with higher Y (lower on screen) render in front.
+     * Uses precise Y for SuperSmoothMover when available. Stable for ties.
+     */
+    public static void zSort(java.util.ArrayList<greenfoot.Actor> actorsToSort, greenfoot.World world) {
+        // Local container class (scoped to this method only).
+        class Entry implements java.lang.Comparable<Entry> {
+            final greenfoot.Actor actor;
+            final boolean superSmooth;
+            final int order;     // preserve original order for stable ties
+            final int xi, yi;    // integer coords snapshot
+            final double xd, yd; // precise coords snapshot
+    
+            // int-based actor
+            Entry(greenfoot.Actor a, int x, int y, int order) {
+                this.actor = a; this.superSmooth = false; this.order = order;
+                this.xi = x; this.yi = y;
+                this.xd = x; this.yd = y;
+            }
+            // precise-based actor
+            Entry(greenfoot.Actor a, double x, double y, int order) {
+                this.actor = a; this.superSmooth = true; this.order = order;
+                this.xi = (int) x; this.yi = (int) y;
+                this.xd = x; this.yd = y;
+            }
+    
+            @Override
+            public int compareTo(Entry other) {
+                double thisY  = superSmooth ? yd : yi;
+                double otherY = other.superSmooth ? other.yd : other.yi;
+    
+                // Handle rare NaN robustly: treat NaN as far back
+                if (java.lang.Double.isNaN(thisY) && java.lang.Double.isNaN(otherY)) return java.lang.Integer.compare(order, other.order);
+                if (java.lang.Double.isNaN(thisY)) return -1;
+                if (java.lang.Double.isNaN(otherY)) return 1;
+    
+                int cmp = java.lang.Double.compare(thisY, otherY);
+                if (cmp != 0) return cmp;
+                return java.lang.Integer.compare(this.order, other.order); // stable tie-break
+            }
+        }
+    
+        // Snapshot actors and positions first.
+        java.util.ArrayList<Entry> list = new java.util.ArrayList<Entry>(actorsToSort.size());
+        int order = 0;
+        for (greenfoot.Actor a : actorsToSort) {
+            if (a instanceof SuperSmoothMover) {
+                SuperSmoothMover s = (SuperSmoothMover) a;
+                list.add(new Entry(a, s.getPreciseX(), s.getPreciseY(), order++));
+            } else {
+                list.add(new Entry(a, a.getX(), a.getY(), order++));
+            }
+        }
+    
+        // Sort farthest-back (smallest Y) first.
+        java.util.Collections.sort(list);
+    
+        // Re-add in paint order with consistent rounding, then restore precise coords.
+        for (Entry e : list) {
+            // Remove if currently in any world to ensure paint-order reset
+            if (e.actor.getWorld() != null) {
+                world.removeObject(e.actor);
+            }
+            if (e.superSmooth) {
+                int rx = roundAwayFromZero(e.xd);
+                int ry = roundAwayFromZero(e.yd);
+                world.addObject(e.actor, rx, ry);
+                // Restore exact double-precision location to avoid drift
+                ((SuperSmoothMover) e.actor).setLocation(e.xd, e.yd);
+            } else {
+                world.addObject(e.actor, e.xi, e.yi);
             }
         }
     }
 
-    // --- Draw bottom textured sidewalk ---
-    int lastLaneBottom = lanePositions[lanes - 1] + heightOffset + spacing;
-    target.setColor(SIDEWALK_BASE);
-    target.fillRect(0, lastLaneBottom, target.getWidth(), sidewalkThickness);
-
-    target.setColor(SIDEWALK_LINE);
-    for (int x = 0; x < target.getWidth(); x += 60) {
-        target.fillRect(x, lastLaneBottom, 2, sidewalkThickness);
+    /** Helper: symmetric rounding that rounds halves away from zero. */
+    private static int roundAwayFromZero(double v) {
+        return (int)(v + Math.signum(v) * 0.5);
     }
-    for (int y = lastLaneBottom; y < lastLaneBottom + sidewalkThickness; y += 20) {
-        target.fillRect(0, y, target.getWidth(), 1);
+    public int[] getLanePositions() {
+        return lanePositionsY;
     }
-    target.setColor(SIDEWALK_CRACK);
-    for (int x = 30; x < target.getWidth(); x += 120) {
-        target.fillRect(x, lastLaneBottom + 10, 1, 20);
-    }
-
-    // Border above and below roads
-    target.setColor(GREY_BORDER);
-    target.fillRect(0, startY - 3, target.getWidth(), 6);
-    target.fillRect(0, lastLaneBottom - spacing, target.getWidth(), 6);
-
-    return lanePositions;
-}
-
-
-
-/**
- * Z-sort so actors with higher Y (lower on screen) render in front.
- * Uses precise Y for SuperSmoothMover when available. Stable for ties.
- */
-public static void zSort(java.util.ArrayList<greenfoot.Actor> actorsToSort, greenfoot.World world) {
-    // Local container class (scoped to this method only).
-    class Entry implements java.lang.Comparable<Entry> {
-        final greenfoot.Actor actor;
-        final boolean superSmooth;
-        final int order;     // preserve original order for stable ties
-        final int xi, yi;    // integer coords snapshot
-        final double xd, yd; // precise coords snapshot
-
-        // int-based actor
-        Entry(greenfoot.Actor a, int x, int y, int order) {
-            this.actor = a; this.superSmooth = false; this.order = order;
-            this.xi = x; this.yi = y;
-            this.xd = x; this.yd = y;
-        }
-        // precise-based actor
-        Entry(greenfoot.Actor a, double x, double y, int order) {
-            this.actor = a; this.superSmooth = true; this.order = order;
-            this.xi = (int) x; this.yi = (int) y;
-            this.xd = x; this.yd = y;
-        }
-
-        @Override
-        public int compareTo(Entry other) {
-            double thisY  = superSmooth ? yd : yi;
-            double otherY = other.superSmooth ? other.yd : other.yi;
-
-            // Handle rare NaN robustly: treat NaN as far back
-            if (java.lang.Double.isNaN(thisY) && java.lang.Double.isNaN(otherY)) return java.lang.Integer.compare(order, other.order);
-            if (java.lang.Double.isNaN(thisY)) return -1;
-            if (java.lang.Double.isNaN(otherY)) return 1;
-
-            int cmp = java.lang.Double.compare(thisY, otherY);
-            if (cmp != 0) return cmp;
-            return java.lang.Integer.compare(this.order, other.order); // stable tie-break
-        }
-    }
-
-    // Snapshot actors and positions first.
-    java.util.ArrayList<Entry> list = new java.util.ArrayList<Entry>(actorsToSort.size());
-    int order = 0;
-    for (greenfoot.Actor a : actorsToSort) {
-        if (a instanceof SuperSmoothMover) {
-            SuperSmoothMover s = (SuperSmoothMover) a;
-            list.add(new Entry(a, s.getPreciseX(), s.getPreciseY(), order++));
-        } else {
-            list.add(new Entry(a, a.getX(), a.getY(), order++));
-        }
-    }
-
-    // Sort farthest-back (smallest Y) first.
-    java.util.Collections.sort(list);
-
-    // Re-add in paint order with consistent rounding, then restore precise coords.
-    for (Entry e : list) {
-        // Remove if currently in any world to ensure paint-order reset
-        if (e.actor.getWorld() != null) {
-            world.removeObject(e.actor);
-        }
-        if (e.superSmooth) {
-            int rx = roundAwayFromZero(e.xd);
-            int ry = roundAwayFromZero(e.yd);
-            world.addObject(e.actor, rx, ry);
-            // Restore exact double-precision location to avoid drift
-            ((SuperSmoothMover) e.actor).setLocation(e.xd, e.yd);
-        } else {
-            world.addObject(e.actor, e.xi, e.yi);
-        }
-    }
-}
-
-/** Helper: symmetric rounding that rounds halves away from zero. */
-private static int roundAwayFromZero(double v) {
-    return (int)(v + Math.signum(v) * 0.5);
-}
 }
 
 class ActorContent implements Comparable<ActorContent> {
@@ -412,4 +436,6 @@ class ActorContent implements Comparable<ActorContent> {
 
     @Override
     public int compareTo(ActorContent other) { return this.yy - other.yy; }
+    
+
 }
