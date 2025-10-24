@@ -3,7 +3,7 @@ import java.util.List;
 
 public class IceMonkey extends Monkey {
     private int freezeRange = 200;   // area of effect
-    private int cooldown = 120;       // min delay between attacks
+    private int cooldown = 120;      // delay between blasts
     private int timer = 0;
 
     public IceMonkey() {
@@ -18,40 +18,28 @@ public class IceMonkey extends Monkey {
         setImage(monkey);
     }
 
- @Override
-public void act() {
-    super.act();
+    @Override
+    public void act() {
+        super.act();
 
-    // Ensure IceMonkey is in the world
-    World world = getWorld();
-    if (world == null) return;
+        World world = getWorld();
+        if (world == null) return;
 
-    // Cooldown timer
-    if (timer > 0) {
-        timer--;
-        return;
-    }
+        // Handle cooldown
+        if (timer > 0) {
+            timer--;
+            return;
+        }
 
-    // Check for any bloons in range
-    List<Bloon> bloons = getObjectsInRange(freezeRange, Bloon.class);
-    boolean hasTarget = false;
-    for (Bloon b : bloons) {
-        if (!b.isImmuneTo(DamageType.ICE)) {
-            hasTarget = true;
-            break;
+        // Check for any non-immune bloon nearby
+        if (isBloonInRange()) {
+            // Spawn the visual + functional freeze effect
+            world.addObject(new IceBlastEffect(freezeRange), getX(), getY());
+            timer = cooldown; // reset cooldown
         }
     }
 
-    // Only attack if there is a target
-    if (hasTarget) {
-        freezeNearby();
-        timer = cooldown;  // reset cooldown
-    }
-}
-
-
-
-    // Check if any non-immune bloon is within freeze radius
+    /** Checks if any non-immune bloon is within range. */
     private boolean isBloonInRange() {
         List<Bloon> bloons = getObjectsInRange(freezeRange, Bloon.class);
         for (Bloon b : bloons) {
@@ -59,29 +47,4 @@ public void act() {
         }
         return false;
     }
-
- private void freezeNearby() {
-    World world = getWorld();
-    if (world == null) return;
-
-    // Deal 1 damage to all in range
-    List<Bloon> bloons = getObjectsInRange(freezeRange, Bloon.class);
-    for (Bloon b : bloons) {
-        if (!b.isImmuneTo(DamageType.ICE)) {
-            b.takeDamage(1, DamageType.ICE);
-        }
-    }
-
-    // Freeze remaining bloons, including children
-    List<Bloon> remaining = getObjectsInRange(freezeRange, Bloon.class);
-    for (Bloon b : remaining) {
-        if (!b.isImmuneTo(DamageType.ICE)) {
-            b.applyFreeze(150);
-        }
-    }
-
-    world.addObject(new IceBlastEffect(freezeRange), getX(), getY());
-
-}
-
 }

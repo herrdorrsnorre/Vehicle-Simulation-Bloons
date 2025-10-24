@@ -37,7 +37,10 @@ public class BloonWorld extends World {
     private Class<? extends Bloon> devBloon2;
     private Class<? extends Monkey> devMonkey; // type of monkey to spawn
 
-    // Now supports two different Bloon types at once.
+    // Add these fields at the top of BloonWorld (with your other instance variables)
+    private int iceBlastTimer = 0;
+    private boolean iceBlastActive = false;
+
     public void enableDevMode(Class<? extends Bloon> bloonType1, Class<? extends Bloon> bloonType2, Class<? extends Monkey> monkeyType) {
         devMode = true;
         devBloon1 = bloonType1;
@@ -63,115 +66,116 @@ public class BloonWorld extends World {
         sidewalkTopEnd = 232 - 10;
         sidewalkBottomStart = lanePositionsY[laneCount - 1] + (laneHeight / 2) + 10;
         sidewalkBottomEnd = sidewalkBottomStart + 80;
-        //enableDevMode(Moab.class, PinkBloon.class, DartMonkey.class);
+        enableDevMode(CeramicBloon.class, PinkBloon.class, IceMonkey.class);
     }
 
     public void act() {
         simulationTime++;
         spawnBloons();
         spawnMonkeys();
+        triggerRandomIceBlast();
         zSort((ArrayList<Actor>) getObjects(Actor.class), this);
     }
-private void spawnBloons() {
-    // --- DEV MODE ---
-    if (devMode && (devBloon1 != null || devBloon2 != null)) {
-        bloonSpawnTimer++;
-        if (bloonSpawnTimer < BASE_BLOON_INTERVAL) return;
-        bloonSpawnTimer = 0;
-
-        // Spawn dev bloons in ALL lanes
-        for (int lane = 0; lane < laneCount; lane++) {
+    private void spawnBloons() {
+        // --- DEV MODE ---
+        if (devMode && (devBloon1 != null || devBloon2 != null)) {
+            bloonSpawnTimer++;
+            if (bloonSpawnTimer < BASE_BLOON_INTERVAL) return;
+            bloonSpawnTimer = 0;
+    
+            // Spawn dev bloons in ALL lanes
+            for (int lane = 0; lane < laneCount; lane++) {
+                BloonSpawner spawner = laneSpawners[lane];
+                int direction = (lane < 3) ? -1 : 1;
+                int startX = (direction == 1) ? 1 : getWidth() - 1;
+    
+                try {
+                    // Randomly pick between devBloon1 and devBloon2 each spawn
+                    Class<? extends Bloon> bloonClass =
+                        (Greenfoot.getRandomNumber(2) == 0 ? devBloon1 : devBloon2);
+    
+                    if (bloonClass != null) {
+                        Bloon b = bloonClass
+                            .getConstructor(int.class, int.class)
+                            .newInstance(direction, spawner.getY());
+                        addObject(b, startX, spawner.getY());
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return;
+        }
+    
+        // --- NORMAL SPAWNING ---
+        simulationTime++;
+    
+        // --- MOAB SPAWN HANDLING ---
+        boolean moabExists = !getObjects(Moab.class).isEmpty();
+        boolean shouldTrySpawnMoab = simulationTime > 6000 && Greenfoot.getRandomNumber(800) == 0;
+    
+        if (!moabExists && shouldTrySpawnMoab) {
+            // Spawn a single MOAB in a random lane
+            int lane = Greenfoot.getRandomNumber(laneCount);
             BloonSpawner spawner = laneSpawners[lane];
             int direction = (lane < 3) ? -1 : 1;
             int startX = (direction == 1) ? 1 : getWidth() - 1;
-
-            try {
-                // Randomly pick between devBloon1 and devBloon2 each spawn
-                Class<? extends Bloon> bloonClass =
-                    (Greenfoot.getRandomNumber(2) == 0 ? devBloon1 : devBloon2);
-
-                if (bloonClass != null) {
-                    Bloon b = bloonClass
-                        .getConstructor(int.class, int.class)
-                        .newInstance(direction, spawner.getY());
+    
+            addObject(new Moab(direction, spawner.getY()), startX, spawner.getY());
+            return; // stop all other spawns this frame
+        }
+    
+        // --- SLOW DOWN NORMAL BLOONS WHEN MOAB EXISTS ---
+        int baseChance = 2;
+        int spawnChance = moabExists ? 1 : baseChance; // 1 = 1% chance per lane per frame
+    
+        for (int lane = 0; lane < laneCount; lane++) {
+            BloonSpawner spawner = laneSpawners[lane];
+            laneSpawnTimers[lane]++;
+    
+            if (Greenfoot.getRandomNumber(100) < spawnChance) {
+                if (laneSpawnTimers[lane] >= 30 && !spawner.isTouchingBloon()) {
+                    laneSpawnTimers[lane] = 0;
+    
+                    // --- Determine allowed tiers based on simulation time ---
+                    ArrayList<Integer> allowedTiers = new ArrayList<>();
+                    if (simulationTime < 600) allowedTiers.add(0);
+                    else if (simulationTime < 1100) { for (int i = 0; i <= 1; i++) allowedTiers.add(i); }
+                    else if (simulationTime < 1700) { for (int i = 0; i <= 2; i++) allowedTiers.add(i); }
+                    else if (simulationTime < 2300) { for (int i = 0; i <= 3; i++) allowedTiers.add(i); }
+                    else if (simulationTime < 2900) { for (int i = 0; i <= 4; i++) allowedTiers.add(i); }
+                    else if (simulationTime < 4100) { for (int i = 0; i <= 6; i++) allowedTiers.add(i); }
+                    else if (simulationTime < 5400) { for (int i = 0; i <= 8; i++) allowedTiers.add(i); }
+                    else if (simulationTime < 6000) { for (int i = 0; i <= 10; i++) allowedTiers.add(i); }
+                    else { for (int i = 0; i <= 11; i++) allowedTiers.add(i); }
+    
+                    int bloonType = allowedTiers.get(Greenfoot.getRandomNumber(allowedTiers.size()));
+    
+                    int direction = (lane < 3) ? -1 : 1;
+                    int startX = (direction == 1) ? 1 : getWidth() - 1;
+    
+                    Bloon b;
+                    switch (bloonType) {
+                        case 0: b = new RedBloon(direction, spawner.getY()); break;
+                        case 1: b = new BlueBloon(direction, spawner.getY()); break;
+                        case 2: b = new GreenBloon(direction, spawner.getY()); break;
+                        case 3: b = new YellowBloon(direction, spawner.getY()); break;
+                        case 4: b = new PinkBloon(direction, spawner.getY()); break;
+                        case 5: b = new BlackBloon(direction, spawner.getY()); break;
+                        case 6: b = new WhiteBloon(direction, spawner.getY()); break;
+                        case 7: b = new PurpleBloon(direction, spawner.getY()); break;
+                        case 8: b = new LeadBloon(direction, spawner.getY()); break;
+                        case 9: b = new ZebraBloon(direction, spawner.getY()); break;
+                        case 10: b = new RainbowBloon(direction, spawner.getY()); break;
+                        case 11: b = new CeramicBloon(direction, spawner.getY()); break;
+                        default: b = new RedBloon(direction, spawner.getY()); break;
+                    }
+    
                     addObject(b, startX, spawner.getY());
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return;
-    }
-
-    // --- NORMAL SPAWNING ---
-    simulationTime++;
-
-    // --- MOAB SPAWN HANDLING ---
-    boolean moabExists = !getObjects(Moab.class).isEmpty();
-    boolean shouldTrySpawnMoab = simulationTime > 6000 && Greenfoot.getRandomNumber(800) == 0;
-
-    if (!moabExists && shouldTrySpawnMoab) {
-        // Spawn a single MOAB in a random lane
-        int lane = Greenfoot.getRandomNumber(laneCount);
-        BloonSpawner spawner = laneSpawners[lane];
-        int direction = (lane < 3) ? -1 : 1;
-        int startX = (direction == 1) ? 1 : getWidth() - 1;
-
-        addObject(new Moab(direction, spawner.getY()), startX, spawner.getY());
-        return; // stop all other spawns this frame
-    }
-
-    // --- SLOW DOWN NORMAL BLOONS WHEN MOAB EXISTS ---
-    int baseChance = 2;
-    int spawnChance = moabExists ? 1 : baseChance; // 1 = 1% chance per lane per frame
-
-    for (int lane = 0; lane < laneCount; lane++) {
-        BloonSpawner spawner = laneSpawners[lane];
-        laneSpawnTimers[lane]++;
-
-        if (Greenfoot.getRandomNumber(100) < spawnChance) {
-            if (laneSpawnTimers[lane] >= 30 && !spawner.isTouchingBloon()) {
-                laneSpawnTimers[lane] = 0;
-
-                // --- Determine allowed tiers based on simulation time ---
-                ArrayList<Integer> allowedTiers = new ArrayList<>();
-                if (simulationTime < 600) allowedTiers.add(0);
-                else if (simulationTime < 1100) { for (int i = 0; i <= 1; i++) allowedTiers.add(i); }
-                else if (simulationTime < 1700) { for (int i = 0; i <= 2; i++) allowedTiers.add(i); }
-                else if (simulationTime < 2300) { for (int i = 0; i <= 3; i++) allowedTiers.add(i); }
-                else if (simulationTime < 2900) { for (int i = 0; i <= 4; i++) allowedTiers.add(i); }
-                else if (simulationTime < 4100) { for (int i = 0; i <= 6; i++) allowedTiers.add(i); }
-                else if (simulationTime < 5400) { for (int i = 0; i <= 8; i++) allowedTiers.add(i); }
-                else if (simulationTime < 6000) { for (int i = 0; i <= 10; i++) allowedTiers.add(i); }
-                else { for (int i = 0; i <= 11; i++) allowedTiers.add(i); }
-
-                int bloonType = allowedTiers.get(Greenfoot.getRandomNumber(allowedTiers.size()));
-
-                int direction = (lane < 3) ? -1 : 1;
-                int startX = (direction == 1) ? 1 : getWidth() - 1;
-
-                Bloon b;
-                switch (bloonType) {
-                    case 0: b = new RedBloon(direction, spawner.getY()); break;
-                    case 1: b = new BlueBloon(direction, spawner.getY()); break;
-                    case 2: b = new GreenBloon(direction, spawner.getY()); break;
-                    case 3: b = new YellowBloon(direction, spawner.getY()); break;
-                    case 4: b = new PinkBloon(direction, spawner.getY()); break;
-                    case 5: b = new BlackBloon(direction, spawner.getY()); break;
-                    case 6: b = new WhiteBloon(direction, spawner.getY()); break;
-                    case 7: b = new PurpleBloon(direction, spawner.getY()); break;
-                    case 8: b = new LeadBloon(direction, spawner.getY()); break;
-                    case 9: b = new ZebraBloon(direction, spawner.getY()); break;
-                    case 10: b = new RainbowBloon(direction, spawner.getY()); break;
-                    case 11: b = new CeramicBloon(direction, spawner.getY()); break;
-                    default: b = new RedBloon(direction, spawner.getY()); break;
-                }
-
-                addObject(b, startX, spawner.getY());
             }
         }
     }
-}
 
     // --- Spawn Monkeys ---
     private void spawnMonkeys() {
@@ -418,6 +422,32 @@ private void spawnBloons() {
     public int[] getLanePositions() {
         return lanePositionsY;
     }
+        /**
+ * Occasionally triggers a fullscreen ice blast effect.
+ */
+private void triggerRandomIceBlast() {
+    // Don't spam — wait a while between possible triggers
+    iceBlastTimer++;
+
+    // Only check every few seconds of simulation time
+    if (iceBlastTimer < 600) return; // roughly 10 seconds if act() runs 60fps
+
+    // Reset timer when something happens or after long time
+    if (iceBlastTimer > 3000) iceBlastTimer = 600; // reset cooldown if nothing triggered
+
+    // Very small random chance per frame
+    if (!iceBlastActive && Greenfoot.getRandomNumber(1000) == 0) {
+        iceBlastActive = true;
+        iceBlastTimer = 0;
+
+        int radius = Math.max(getWidth(), getHeight()) / 2;
+        IceBlastEffect blast = new IceBlastEffect(radius);
+        addObject(blast, getWidth() / 2, getHeight() / 2);
+
+        iceBlastActive = false;
+    }
+}
+
 }
 
 class ActorContent implements Comparable<ActorContent> {
@@ -436,6 +466,6 @@ class ActorContent implements Comparable<ActorContent> {
 
     @Override
     public int compareTo(ActorContent other) { return this.yy - other.yy; }
-    
+
 
 }

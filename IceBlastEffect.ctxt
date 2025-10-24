@@ -2,7 +2,6 @@
 comment0.target=IceBlastEffect
 comment1.params=radius
 comment1.target=IceBlastEffect(int)
-comment1.text=\r\n\ @param\ radius\ The\ freeze\ radius\ to\ visually\ match.\r\n
 comment2.params=
 comment2.target=void\ act()
 numComments=3
