@@ -1,6 +1,40 @@
 import greenfoot.*;
 import java.util.ArrayList;
 import java.util.Collections;
+/*
+  Overview:
+ * This simulation is meant to emulate the game bloons tower defense but in a more retro style.
+  Vehicles have been replaced by bloons. Bloons have a hierarchy and will spawn the bloon of a lower tier upon death. 
+  Pedestrians have been replaced by Monkeys. Monkeys are vulnerable to death upon contact with Bloons. 
+  Therefore they will stop to attack bloons in their path to clear a path to cross the street.
+  The simulation begins with low tier bloons and weaker monkeys like darts and boomerangs. 
+  However bloons of higher tiers begin to spawn as the simulation continues as do higher tiers of monkeys. 
+  Bloons all have different speeds, and certain bloons are immune to different monkeys attacks. 
+  Certain bloons will spawn multiple children on death. Certain bloons have more than 1 health before dying. 
+  Different bloons will deal more damage to monkeys upon contact
+  Bloons are all cabable of running past each other howver the biggest bloon here the Moab cannot be run past and bloons will lane change to go around it. 
+  Credits: 
+      Sounds:
+        https://www.youtube.com/@crashbandicoot1352/videos (PurpleBloonsound, LeadBloonSound, CeramicBloonSound)
+        https://www.youtube.com/@sirpaeur (PopSound)
+        https://www.youtube.com/watch?v=JCu7q5gZaeA (IceSound trimmed)
+        Explosion sound stolen from my grade 11 project
+        hit sound https://www.youtube.com/watch?v=JCu7q5gZaeA
+        moab hit sound https://www.youtube.com/watch?v=Cu_ouCF86jI
+        moab pop sound https://www.youtube.com/watch?v=Up7NrViNb1w
+    Images:
+        https://www.spriters-resource.com/browser_games/bloonstd/asset/193491/
+        https://www.reddit.com/r/btd6/comments/11x1oqz/remaking_all_the_btd6_towers_in_the_btd1_style/
+        https://www.reddit.com/r/btd6/comments/14uvw5g/pixel_art_bloons/
+        https://bloons.fandom.com/wiki/Bomb_Tower_(BTD4)
+        https://bloons.fandom.com/wiki/Ice_Tower (Flash BTD5)
+        https://bloons.fandom.com/wiki/Monkey_Apprentice_(BTD4)
+        (ice explosion stolen from my grade 11 final project but reversed the temperature)
+        stock images of magic and bomb
+        https://bloons.fandom.com/wiki/Massive_Ornary_Air_Blimp_(MOAB)/Gallery (taken but modified with this tool https://giventofly.github.io/pixelit/#tryit)
+
+I have also used ChatGPT to write the documentation comments, and to write the code to draw the background image        
+*/
 /**
  * The {@code BloonWorld} class represents the main simulation environment for the Bloons-style game.
  * <p>
