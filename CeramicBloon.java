@@ -34,9 +34,20 @@ public class CeramicBloon extends Bloon {
         // Determine damage stage (every 2 HP)
         int stage = Math.min(4, (10 - health) / 2);
         if (stage != lastDamageStage) {
-            setImage(DAMAGE_IMAGES[stage]);
             lastDamageStage = stage;
+            // If currently frozen, update the stored base image and reapply frozen visual
+            if (frozen) {
+                // keep originalImage as the non-frozen new stage
+                originalImage = new GreenfootImage(DAMAGE_IMAGES[stage]);
+                // create frozen overlay from that base and show it
+                GreenfootImage frozen = makeFrozenCopy(originalImage);
+                setImage(frozen);
+            } else {
+                // normal (not frozen) swap to new stage
+                setImage(DAMAGE_IMAGES[stage]);
+            }
         }
+
     }
     @Override
     protected void pop() 

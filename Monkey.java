@@ -80,9 +80,9 @@ public abstract class Monkey extends SuperSmoothMover {
             if (moveDirection == -1) setRotation(270); // bottom→top
             else setRotation(90); // top→bottom
         }
-
+    
         move(speed);
-
+    
         // Remove if off-screen
         if (getX() < -getImage().getWidth()/2 || getX() > getWorld().getWidth() + getImage().getWidth()/2) {
             getWorld().removeObject(this);
@@ -167,4 +167,4 @@ public abstract class Monkey extends SuperSmoothMover {
 
     private int despawnY = -1;
     public void setDespawnY(int y) { despawnY = y; }
-    }
+}

@@ -11,19 +11,19 @@ public abstract class Bloon extends SuperSmoothMover {
     protected int laneY;     // y-position of lane center
     protected int contactDamage = 1;
     private int contactCooldown = 0; // frames until this bloon can hurt a monkey again
-    private boolean frozen = false;
-    private int freezeTimer = 0;
+    protected boolean frozen = false;
+    protected int freezeTimer = 0;
     protected GreenfootImage originalImage;
     // temporary immunity tracker
     private java.util.EnumMap<DamageType, Boolean> tempImmunities = new java.util.EnumMap<>(DamageType.class);
     protected boolean changingLane = false;
     protected int targetLaneY;
     protected double laneChangeSpeed = 2.0; // pixels per frame
-
+    
     public void setTemporaryImmunity(DamageType type, boolean active) {
         tempImmunities.put(type, active);
     }
-
+    
     public Bloon(double speed, int health, int direction, int laneY, Class<? extends Bloon> nextTier) {
         this.speed = speed;
         this.health = health;
@@ -38,9 +38,9 @@ public abstract class Bloon extends SuperSmoothMover {
                 setImage(img);
             }
         }
-
+    
     }
-
+    
     @Override
     public void act() {
         if (frozen) {
@@ -48,18 +48,19 @@ public abstract class Bloon extends SuperSmoothMover {
             if (freezeTimer <= 0) {
                 frozen = false;
                 setTemporaryImmunity(DamageType.NORMAL, false); // remove lead-like immunity
-                setImage(new GreenfootImage(originalImage)); // restore normal sprite
+                setImage(new GreenfootImage(originalImage)); 
+                updateImageDirection();
             } else {
                 return; // stay frozen
             }
         }
-
+    
         handleTrafficLogic();
         move(speed * direction);
         checkCollisionWithMonkey();
         checkOutOfBounds();
     }
-
+    
     public void takeDamage(int dmg, DamageType type) {
         // Check permanent immunity first
         if (isImmuneTo(type)) {
@@ -110,23 +111,20 @@ public abstract class Bloon extends SuperSmoothMover {
         world.addObject(pop, x, y);
         world.removeObject(this);
     }
-
-
-
-
+    
     /** Child tier class for next tier (override if needed) */
     protected Class<? extends Bloon> getChildTier() {
         return null; // default: last tier
     }
-
-   protected void checkCollisionWithMonkey() {
+    
+    protected void checkCollisionWithMonkey() {
         Monkey monkey = (Monkey) getOneIntersectingObject(Monkey.class);
         if (monkey != null && contactCooldown == 0) {
             monkey.takeDamage(contactDamage);
             contactCooldown = 30; // 0.5 seconds if game runs at 60 fps
         }
     }
-
+    
     /** Remove if out of world bounds */
     protected void checkOutOfBounds() {
         if (getWorld() == null) return;
@@ -134,8 +132,8 @@ public abstract class Bloon extends SuperSmoothMover {
             getWorld().removeObject(this);
         }
     }
-
-
+    
+    
     public boolean isImmuneTo(DamageType type) {
         if (this instanceof LeadBloon && (type != DamageType.EXPLOSIVE)) return true;
         if (this instanceof WhiteBloon && type == DamageType.ICE) return true;
@@ -150,34 +148,16 @@ public abstract class Bloon extends SuperSmoothMover {
     
         frozen = true;
         freezeTimer = duration;
-    
-        // temporarily acts like a lead (immune to normal)
         setTemporaryImmunity(DamageType.NORMAL, true);
     
-        if (originalImage == null)
-            originalImage = new GreenfootImage(getImage());
+        // store the non-frozen base image for later restoration
+        originalImage = new GreenfootImage(getImage());
     
-        GreenfootImage frozenImg = new GreenfootImage(originalImage);
-    
-        Color freezeColor = new Color(100, 180, 255, 80); // semi-transparent icy blue
-    
-        for (int x = 0; x < frozenImg.getWidth(); x++) {
-            for (int y = 0; y < frozenImg.getHeight(); y++) {
-                Color pixel = frozenImg.getColorAt(x, y);
-                if (pixel.getAlpha() > 0) {
-                    // blend the freeze color on top of the original
-                    int r = (pixel.getRed() + freezeColor.getRed()) / 2;
-                    int g = (pixel.getGreen() + freezeColor.getGreen()) / 2;
-                    int b = (pixel.getBlue() + freezeColor.getBlue()) / 2;
-                    int a = pixel.getAlpha(); // keep original alpha
-                    frozenImg.setColorAt(x, y, new Color(r, g, b, a));
-                }
-            }
-        }
-    
+        // create and show the frozen visual
+        GreenfootImage frozenImg = makeFrozenCopy(originalImage);
         setImage(frozenImg);
     }
-        
+
     protected void updateImageDirection() {
         if (originalImage == null) return;
         GreenfootImage img = new GreenfootImage(originalImage);
@@ -262,6 +242,26 @@ public abstract class Bloon extends SuperSmoothMover {
                 return;
             }
         }
+    }
+    /** Create a frozen (icy-blue) version of a given base image without changing flags/timers. */
+    protected GreenfootImage makeFrozenCopy(GreenfootImage base) {
+        if (base == null) return null;
+        GreenfootImage frozenImg = new GreenfootImage(base);
+        Color freezeColor = new Color(100, 180, 255, 80); // same used before
+    
+        for (int x = 0; x < frozenImg.getWidth(); x++) {
+            for (int y = 0; y < frozenImg.getHeight(); y++) {
+                Color pixel = frozenImg.getColorAt(x, y);
+                if (pixel.getAlpha() > 0) {
+                    int r = (pixel.getRed() + freezeColor.getRed()) / 2;
+                    int g = (pixel.getGreen() + freezeColor.getGreen()) / 2;
+                    int b = (pixel.getBlue() + freezeColor.getBlue()) / 2;
+                    int a = pixel.getAlpha();
+                    frozenImg.setColorAt(x, y, new Color(r, g, b, a));
+                }
+            }
+        }
+        return frozenImg;
     }
 
 }

@@ -8,7 +8,7 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
  */
 public class PopEffect extends Actor
 {
-    private int timer = 0; // counts frames
+    private int timer = 0; 
 
     {
         GreenfootImage effect = new GreenfootImage("Pop.png");

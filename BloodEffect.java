@@ -14,7 +14,7 @@ public class BloodEffect extends Actor {
         }
         setImage(frames[0]);
         GreenfootSound hit = new GreenfootSound("hit.wav");
-        hit.setVolume(70);
+        hit.setVolume(50);
         hit.play();
     }
 

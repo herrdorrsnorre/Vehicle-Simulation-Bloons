@@ -25,7 +25,6 @@ public class BloonWorld extends World {
     private int monkeySpawnTimer = 0;
     private int bloonSpawnTimer = 0;
 
-    // sidewalk bounds
     private int sidewalkTopStart;
     private int sidewalkTopEnd;
     private int sidewalkBottomStart;
@@ -37,16 +36,8 @@ public class BloonWorld extends World {
     private Class<? extends Bloon> devBloon2;
     private Class<? extends Monkey> devMonkey; // type of monkey to spawn
 
-    // Add these fields at the top of BloonWorld (with your other instance variables)
     private int iceBlastTimer = 0;
     private boolean iceBlastActive = false;
-
-    public void enableDevMode(Class<? extends Bloon> bloonType1, Class<? extends Bloon> bloonType2, Class<? extends Monkey> monkeyType) {
-        devMode = true;
-        devBloon1 = bloonType1;
-        devBloon2 = bloonType2;
-        devMonkey = monkeyType;
-    }
 
     public BloonWorld() {
         super(1024, 800, 1, false);
@@ -66,9 +57,14 @@ public class BloonWorld extends World {
         sidewalkTopEnd = 232 - 10;
         sidewalkBottomStart = lanePositionsY[laneCount - 1] + (laneHeight / 2) + 10;
         sidewalkBottomEnd = sidewalkBottomStart + 80;
-        enableDevMode(CeramicBloon.class, PinkBloon.class, IceMonkey.class);
+        //enableDevMode(CeramicBloon.class, PinkBloon.class, IceMonkey.class);
     }
-
+    public void enableDevMode(Class<? extends Bloon> bloonType1, Class<? extends Bloon> bloonType2, Class<? extends Monkey> monkeyType) {
+        devMode = true;
+        devBloon1 = bloonType1;
+        devBloon2 = bloonType2;
+        devMonkey = monkeyType;
+    }
     public void act() {
         simulationTime++;
         spawnBloons();
@@ -90,7 +86,6 @@ public class BloonWorld extends World {
                 int startX = (direction == 1) ? 1 : getWidth() - 1;
     
                 try {
-                    // Randomly pick between devBloon1 and devBloon2 each spawn
                     Class<? extends Bloon> bloonClass =
                         (Greenfoot.getRandomNumber(2) == 0 ? devBloon1 : devBloon2);
     
@@ -111,35 +106,45 @@ public class BloonWorld extends World {
         simulationTime++;
     
         // --- MOAB SPAWN HANDLING ---
-        boolean moabExists = !getObjects(Moab.class).isEmpty();
-        boolean shouldTrySpawnMoab = simulationTime > 6000 && Greenfoot.getRandomNumber(800) == 0;
+        int currentMoabs = getObjects(Moab.class).size();
     
-        if (!moabExists && shouldTrySpawnMoab) {
-            // Spawn a single MOAB in a random lane
+        // Max allowed MOABs increases slowly over time
+        int maxMoabs = 1 + (simulationTime / 8000); // +1 every 8000 ticks
+        if (maxMoabs > 5) maxMoabs = 5; // hard cap, optional
+    
+        // Base rarity decreases over time (more frequent MOABs)
+        int baseChance = 1000;
+        int moabChance = Math.max(200, baseChance - (simulationTime / 2000) * 100);
+    
+        boolean canSpawnMoab = currentMoabs < maxMoabs;
+        boolean shouldTrySpawnMoab = simulationTime > 6000 && Greenfoot.getRandomNumber(moabChance) == 0;
+    
+        if (canSpawnMoab && shouldTrySpawnMoab) {
             int lane = Greenfoot.getRandomNumber(laneCount);
             BloonSpawner spawner = laneSpawners[lane];
             int direction = (lane < 3) ? -1 : 1;
             int startX = (direction == 1) ? 1 : getWidth() - 1;
     
             addObject(new Moab(direction, spawner.getY()), startX, spawner.getY());
-            return; // stop all other spawns this frame
+            return; // stop other spawns this frame
         }
     
-        // --- SLOW DOWN NORMAL BLOONS WHEN MOAB EXISTS ---
-        int baseChance = 2;
-        int spawnChance = moabExists ? 1 : baseChance; // 1 = 1% chance per lane per frame
+        // --- NORMAL BLOON SPAWNING ---
+        // Reduce normal spawns if multiple MOABs exist
+        int bloonSpawnChance = 2 - Math.min(currentMoabs, 1); // halve rate when moabs exist
+        bloonSpawnChance = Math.max(1, bloonSpawnChance);
     
         for (int lane = 0; lane < laneCount; lane++) {
             BloonSpawner spawner = laneSpawners[lane];
             laneSpawnTimers[lane]++;
     
-            if (Greenfoot.getRandomNumber(100) < spawnChance) {
+            if (Greenfoot.getRandomNumber(100) < bloonSpawnChance) {
                 if (laneSpawnTimers[lane] >= 30 && !spawner.isTouchingBloon()) {
                     laneSpawnTimers[lane] = 0;
     
-                    // --- Determine allowed tiers based on simulation time ---
+                    // --- Determine allowed tiers ---
                     ArrayList<Integer> allowedTiers = new ArrayList<>();
-                    if (simulationTime < 600) allowedTiers.add(0);
+                    if (simulationTime < 600) { for (int i = 0; i <= 0; i++) allowedTiers.add(i); }
                     else if (simulationTime < 1100) { for (int i = 0; i <= 1; i++) allowedTiers.add(i); }
                     else if (simulationTime < 1700) { for (int i = 0; i <= 2; i++) allowedTiers.add(i); }
                     else if (simulationTime < 2300) { for (int i = 0; i <= 3; i++) allowedTiers.add(i); }
@@ -147,8 +152,10 @@ public class BloonWorld extends World {
                     else if (simulationTime < 4100) { for (int i = 0; i <= 6; i++) allowedTiers.add(i); }
                     else if (simulationTime < 5400) { for (int i = 0; i <= 8; i++) allowedTiers.add(i); }
                     else if (simulationTime < 6000) { for (int i = 0; i <= 10; i++) allowedTiers.add(i); }
-                    else { for (int i = 0; i <= 11; i++) allowedTiers.add(i); }
-    
+                    else if (simulationTime < 6400) { for (int i = 0; i <= 11; i++) allowedTiers.add(i); }
+                    else { for (int i = 0; i <= 12; i++) allowedTiers.add(i); } // ✅ Always include at least tier 12 (MOABs and below)
+                    
+                        
                     int bloonType = allowedTiers.get(Greenfoot.getRandomNumber(allowedTiers.size()));
     
                     int direction = (lane < 3) ? -1 : 1;
@@ -177,6 +184,7 @@ public class BloonWorld extends World {
         }
     }
 
+
     // --- Spawn Monkeys ---
     private void spawnMonkeys() {
         monkeySpawnTimer++;
@@ -204,8 +212,8 @@ public class BloonWorld extends World {
 
         switch (phase) {
             case 1:
-                if (roll < 35) monkeyType = 0;
-                else if (roll < 50) monkeyType = 1;
+                if (roll < 50) monkeyType = 0;
+                else if (roll < 75) monkeyType = 1;
                 break;
             case 2:
                 if (roll < 20) monkeyType = 0;
@@ -422,50 +430,30 @@ public class BloonWorld extends World {
     public int[] getLanePositions() {
         return lanePositionsY;
     }
-        /**
- * Occasionally triggers a fullscreen ice blast effect.
- */
-private void triggerRandomIceBlast() {
-    // Don't spam — wait a while between possible triggers
-    iceBlastTimer++;
-
-    // Only check every few seconds of simulation time
-    if (iceBlastTimer < 600) return; // roughly 10 seconds if act() runs 60fps
-
-    // Reset timer when something happens or after long time
-    if (iceBlastTimer > 3000) iceBlastTimer = 600; // reset cooldown if nothing triggered
-
-    // Very small random chance per frame
-    if (!iceBlastActive && Greenfoot.getRandomNumber(1000) == 0) {
-        iceBlastActive = true;
-        iceBlastTimer = 0;
-
-        int radius = Math.max(getWidth(), getHeight()) / 2;
-        IceBlastEffect blast = new IceBlastEffect(radius);
-        addObject(blast, getWidth() / 2, getHeight() / 2);
-
-        iceBlastActive = false;
+    /**
+     * Occasionally triggers a fullscreen ice blast effect.
+     */
+    private void triggerRandomIceBlast() {
+        // Don't spam — wait a while between possible triggers
+        iceBlastTimer++;
+    
+        // Only check every few seconds of simulation time
+        if (iceBlastTimer < 600) return; // roughly 10 seconds if act() runs 60fps
+    
+        // Reset timer when something happens or after long time
+        if (iceBlastTimer > 3000) iceBlastTimer = 600; // reset cooldown if nothing triggered
+    
+        // Very small random chance per frame
+        if (!iceBlastActive && Greenfoot.getRandomNumber(1000) == 0) {
+            iceBlastActive = true;
+            iceBlastTimer = 0;
+    
+            int radius = Math.max(getWidth(), getHeight()) / 2;
+            IceBlastEffect blast = new IceBlastEffect(radius);
+            addObject(blast, getWidth() / 2, getHeight() / 2);
+    
+            iceBlastActive = false;
+        }
     }
 }
 
-}
-
-class ActorContent implements Comparable<ActorContent> {
-    private Actor actor;
-    private int xx, yy;
-
-    public ActorContent(Actor actor, int xx, int yy) {
-        this.actor = actor;
-        this.xx = xx;
-        this.yy = yy;
-    }
-
-    public int getX() { return xx; }
-    public int getY() { return yy; }
-    public Actor getActor() { return actor; }
-
-    @Override
-    public int compareTo(ActorContent other) { return this.yy - other.yy; }
-
-
-}

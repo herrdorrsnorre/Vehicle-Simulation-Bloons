@@ -9,7 +9,7 @@ public class BoomerangMonkey extends Monkey {
         health = 10;
         speed = 3;
         GreenfootImage monkey = new GreenfootImage("Boomerang_Monkey.png");
-        monkey.scale(89, 96);
+        monkey.scale(71, 77);
         setImage(monkey);
     }
 }
