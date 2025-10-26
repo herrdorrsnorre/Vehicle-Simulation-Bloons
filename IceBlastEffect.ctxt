@@ -1,7 +1,10 @@
 #BlueJ class context
 comment0.target=IceBlastEffect
+comment0.text=\r\n\ Represents\ an\ animated\ ice\ explosion\ effect\ that\ damages\ and\ freezes\ nearby\ {@link\ Bloon}s.\r\n\ <p>\r\n\ When\ spawned,\ this\ effect\:\r\n\ <ul>\r\n\ \ \ <li>Plays\ an\ animation\ using\ sequential\ ice\ frames\ ({@code\ Ice1.png}\u2013{@code\ Ice8.png}).</li>\r\n\ \ \ <li>Deals\ {@link\ DamageType\#ICE}\ damage\ to\ all\ Bloons\ within\ a\ specified\ radius.</li>\r\n\ \ \ <li>Applies\ a\ temporary\ freeze\ status\ effect\ to\ affected\ Bloons.</li>\r\n\ \ \ <li>Plays\ a\ sound\ effect\ and\ removes\ itself\ after\ the\ animation\ finishes.</li>\r\n\ </ul>\r\n\r\n\ <p>This\ actor\ is\ typically\ spawned\ by\ a\ projectile\ (e.g.\ an\ Ice\ Tower\ shot)\ when\ it\ hits\r\n\ a\ target,\ producing\ a\ visual\ and\ gameplay\ impact.</p>\r\n
 comment1.params=radius
 comment1.target=IceBlastEffect(int)
+comment1.text=\r\n\ Creates\ a\ new\ IceBlastEffect\ with\ the\ specified\ radius.\r\n\ <p>\r\n\ The\ constructor\ preloads\ animation\ frames,\ scales\ them\ according\ to\ the\ radius,\r\n\ and\ plays\ a\ one-time\ sound\ effect.\r\n\ </p>\r\n\r\n\ @param\ radius\ The\ radius\ of\ the\ ice\ blast\ (in\ pixels).\r\n
 comment2.params=
 comment2.target=void\ act()
+comment2.text=\r\n\ Called\ every\ frame\ to\ control\ the\ ice\ effect\u2019s\ animation\ and\ timing.\r\n\ <p>\r\n\ On\ the\ first\ frame,\ applies\ damage\ and\ freeze\ effects\ to\ all\ {@link\ Bloon}s\ within\r\n\ the\ blast\ radius.\ Then\ cycles\ through\ the\ animation\ frames\ until\ finished,\ at\ which\r\n\ point\ the\ object\ removes\ itself\ from\ the\ world.\r\n\ </p>\r\n
 numComments=3

@@ -1,13 +1,19 @@
 #BlueJ class context
 comment0.target=MagicProjectile
+comment0.text=\r\n\ A\ homing\ projectile\ that\ tracks\ and\ damages\ bloons\ using\ magical\ energy.\r\n\ <p>\r\n\ The\ {@code\ MagicProjectile}\ seeks\ out\ nearby\ bloons\ and\ turns\ toward\ its\ target\r\n\ as\ it\ travels.\ It\ can\ pierce\ multiple\ bloons\ before\ disappearing,\ unless\ it\r\n\ hits\ a\ bloon\ that\ is\ immune\ to\ magic\ damage\ (e.g.,\ a\ Purple\ Bloon).\r\n\ </p>\r\n\r\n\ <p>Key\ features\:</p>\r\n\ <ul>\r\n\ \ \ <li>Automatically\ homes\ in\ on\ nearby\ bloons.</li>\r\n\ \ \ <li>Deals\ {@code\ MAGIC}\ damage\ to\ non-immune\ bloons.</li>\r\n\ \ \ <li>Destroyed\ immediately\ upon\ hitting\ a\ magic-immune\ bloon.</li>\r\n\ \ \ <li>Can\ pierce\ through\ several\ bloons\ before\ vanishing.</li>\r\n\ </ul>\r\n
 comment1.params=source\ target
 comment1.target=MagicProjectile(Monkey,\ Bloon)
+comment1.text=\r\n\ Constructs\ a\ {@code\ MagicProjectile}\ originating\ from\ a\ tower.\r\n\r\n\ @param\ source\ the\ tower\ (monkey)\ that\ launched\ this\ projectile\r\n\ @param\ target\ the\ initial\ bloon\ target\r\n
 comment2.params=
 comment2.target=void\ act()
+comment2.text=\r\n\ Performs\ homing\ movement,\ target\ acquisition,\ and\ collision\ handling.\r\n\ <p>\r\n\ Each\ frame,\ the\ projectile\ attempts\ to\ track\ a\ nearby\ bloon,\r\n\ turns\ toward\ it,\ moves\ forward,\ and\ checks\ for\ collisions.\r\n\ </p>\r\n
 comment3.params=
 comment3.target=Bloon\ getNearestBloon()
+comment3.text=\r\n\ Finds\ the\ nearest\ bloon\ in\ the\ world\ to\ home\ in\ on.\r\n\r\n\ @return\ the\ nearest\ {@code\ Bloon}\ to\ this\ projectile,\ or\ {@code\ null}\ if\ none\ exist\r\n
 comment4.params=x1\ y1\ x2\ y2
 comment4.target=double\ getDistance(double,\ double,\ double,\ double)
+comment4.text=\r\n\ Calculates\ the\ Euclidean\ distance\ between\ two\ points.\r\n\r\n\ @param\ x1\ x-coordinate\ of\ the\ first\ point\r\n\ @param\ y1\ y-coordinate\ of\ the\ first\ point\r\n\ @param\ x2\ x-coordinate\ of\ the\ second\ point\r\n\ @param\ y2\ y-coordinate\ of\ the\ second\ point\r\n\ @return\ the\ straight-line\ distance\ between\ the\ two\ points\r\n
 comment5.params=
 comment5.target=void\ checkCollision()
+comment5.text=\r\n\ Checks\ for\ collisions\ with\ bloons\ and\ applies\ magic\ damage\ when\ appropriate.\r\n\ <p>\r\n\ -\ If\ a\ bloon\ is\ immune\ to\ magic,\ a\ sound\ plays\ and\ the\ projectile\ is\ destroyed.<br>\r\n\ -\ Otherwise,\ the\ bloon\ takes\ one\ point\ of\ {@code\ MAGIC}\ damage.<br>\r\n\ -\ Each\ hit\ decreases\ pierce;\ the\ projectile\ is\ removed\ once\ pierce\ reaches\ zero.\r\n\ </p>\r\n
 numComments=6

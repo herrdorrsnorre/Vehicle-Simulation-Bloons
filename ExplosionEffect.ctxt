@@ -1,8 +1,10 @@
 #BlueJ class context
 comment0.target=ExplosionEffect
+comment0.text=\r\n\ Represents\ a\ short-lived\ explosion\ animation\ effect\ with\ sound.\r\n\ <p>\r\n\ When\ created,\ the\ {@code\ ExplosionEffect}\ plays\ a\ sequence\ of\ preloaded\ explosion\r\n\ images\ and\ an\ explosion\ sound,\ then\ removes\ itself\ from\ the\ world\ when\ the\ animation\r\n\ finishes.\ The\ explosion\u2019s\ visual\ size\ scales\ with\ the\ provided\ radius.\r\n\ </p>\r\n\r\n\ <h2>Features\:</h2>\r\n\ <ul>\r\n\ \ \ <li>Scales\ automatically\ based\ on\ explosion\ radius.</li>\r\n\ \ \ <li>Plays\ a\ synchronized\ sound\ effect\ on\ creation.</li>\r\n\ \ \ <li>Animates\ through\ multiple\ frames\ with\ adjustable\ delay.</li>\r\n\ \ \ <li>Automatically\ cleans\ up\ when\ finished\ (self-removal).</li>\r\n\ </ul>\r\n\r\n\ <p>This\ effect\ is\ purely\ visual\u2014it\ does\ not\ apply\ damage.\ Damage\ should\ be\ handled\r\n\ by\ the\ projectile\ or\ tower\ that\ spawns\ it.</p>\r\n
 comment1.params=radius
 comment1.target=ExplosionEffect(int)
-comment1.text=\r\n\ @param\ radius\ The\ explosion\ radius\ (used\ to\ determine\ visual\ size)\r\n
+comment1.text=\r\n\ Constructs\ a\ new\ explosion\ visual\ effect.\r\n\ <p>\r\n\ The\ explosion\ animation\ is\ scaled\ according\ to\ the\ given\ radius,\ and\r\n\ automatically\ plays\ a\ sound\ effect\ when\ spawned.\r\n\ </p>\r\n\r\n\ @param\ radius\ The\ radius\ of\ the\ explosion\ (used\ only\ to\ determine\ visual\ scale).\r\n
 comment2.params=
 comment2.target=void\ act()
+comment2.text=\r\n\ Called\ each\ frame\ to\ animate\ the\ explosion.\r\n\ <ul>\r\n\ \ \ <li>Progresses\ through\ animation\ frames\ based\ on\ {@link\ \#frameDelay}.</li>\r\n\ \ \ <li>Removes\ this\ object\ from\ the\ world\ once\ the\ animation\ completes.</li>\r\n\ </ul>\r\n
 numComments=3

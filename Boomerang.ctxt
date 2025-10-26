@@ -1,11 +1,16 @@
 #BlueJ class context
 comment0.target=Boomerang
+comment0.text=\r\n\ Represents\ a\ returning\ projectile\ that\ behaves\ like\ a\ boomerang.\r\n\ <p>\r\n\ The\ {@code\ Boomerang}\ travels\ forward\ a\ set\ distance,\ damaging\ bloons\ it\ collides\ with.\r\n\ Once\ it\ reaches\ its\ maximum\ distance,\ it\ reverses\ direction\ and\ returns\ to\ its\ source.\r\n\ It\ can\ pierce\ through\ multiple\ bloons,\ damaging\ each\ once\ per\ flight\ direction.\r\n\ </p>\r\n\ \r\n\ <p>Key\ features\:</p>\r\n\ <ul>\r\n\ \ \ <li>Travels\ up\ to\ a\ maximum\ distance\ before\ returning.</li>\r\n\ \ \ <li>Deals\ {@code\ NORMAL}\ damage\ to\ non-immune\ bloons.</li>\r\n\ \ \ <li>Resets\ pierce\ count\ when\ returning\ to\ allow\ for\ additional\ hits.</li>\r\n\ \ \ <li>Returns\ to\ the\ original\ tower\ (monkey),\ and\ disappears\ upon\ arrival.</li>\r\n\ </ul>\r\n
 comment1.params=source\ target
 comment1.target=Boomerang(Monkey,\ Bloon)
+comment1.text=\r\n\ Constructs\ a\ new\ {@code\ Boomerang}\ projectile.\r\n\r\n\ @param\ source\ the\ tower\ that\ launched\ this\ boomerang\r\n\ @param\ target\ the\ bloon\ initially\ targeted\ by\ this\ projectile\r\n
 comment2.params=
 comment2.target=void\ act()
+comment2.text=\r\n\ Updates\ the\ projectile\ each\ frame.\r\n\ <p>\r\n\ The\ boomerang\ either\ travels\ outward\ or\ returns\ to\ its\ source.\r\n\ It\ checks\ for\ collisions\ with\ bloons\ and\ removes\ itself\ upon\r\n\ hitting\ too\ many\ targets\ or\ reaching\ its\ source\ again.\r\n\ </p>\r\n
 comment3.params=
 comment3.target=void\ checkCollision()
+comment3.text=\r\n\ Checks\ for\ collisions\ with\ bloons\ and\ applies\ damage\ if\ appropriate.\r\n\ <p>\r\n\ -\ Deals\ {@code\ NORMAL}\ damage\ to\ non-immune\ bloons.<br>\r\n\ -\ Plays\ a\ sound\ and\ is\ destroyed\ if\ it\ hits\ an\ immune\ bloon.<br>\r\n\ -\ Tracks\ previously\ hit\ bloons\ to\ avoid\ double\ damage\ per\ phase.<br>\r\n\ -\ Removes\ itself\ if\ pierce\ count\ reaches\ zero.\r\n\ </p>\r\n
 comment4.params=x\ y
 comment4.target=double\ distanceTo(int,\ int)
+comment4.text=\r\n\ Calculates\ the\ Euclidean\ distance\ from\ the\ boomerang\ to\ a\ given\ point.\r\n\r\n\ @param\ x\ the\ target\ x-coordinate\r\n\ @param\ y\ the\ target\ y-coordinate\r\n\ @return\ the\ straight-line\ distance\ to\ the\ specified\ point\r\n
 numComments=5

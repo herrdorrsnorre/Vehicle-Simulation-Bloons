@@ -1,57 +1,93 @@
 import greenfoot.*;
 
 /**
- * Base Bloon class.
+ * Base abstract class representing a Bloon (enemy) in the game.
+ * <p>
+ * A {@code Bloon} moves horizontally along a lane, can take and respond to various
+ * types of {@link DamageType} damage, and may spawn child bloons when popped.
+ * Bloons can freeze, change lanes to avoid slower traffic, and deal contact
+ * damage to monkeys.
+ * </p>
+ *
+ * <p>Key features:</p>
+ * <ul>
+ *   <li>Supports multiple damage immunities and temporary freeze effects.</li>
+ *   <li>Handles lane-following and lane-changing traffic logic.</li>
+ *   <li>Spawns child bloons when popped.</li>
+ *   <li>Can temporarily harm monkeys on contact with cooldowns.</li>
+ * </ul>
  */
 public abstract class Bloon extends SuperSmoothMover {
+    /** Movement speed in pixels per frame. */
     protected double speed;
+    /** Current health of the bloon. */
     protected int health;
+    /** The next-tier bloon class to spawn when this one pops. */
     protected Class<? extends Bloon> nextTier;
-    protected int direction; // 1 = right, -1 = left
-    protected int laneY;     // y-position of lane center
+    /** Direction of travel: {@code 1 = right}, {@code -1 = left}. */
+    protected int direction;
+    /** Vertical position representing the lane's center Y-coordinate. */
+    protected int laneY;
+    /** Amount of damage dealt to a monkey on contact. */
     protected int contactDamage = 1;
-    private int contactCooldown = 0; // frames until this bloon can hurt a monkey again
+    /** Cooldown (in frames) before this bloon can damage a monkey again. */
+    private int contactCooldown = 0; 
+    /** Whether the bloon is currently frozen. */
     protected boolean frozen = false;
+    /** Time remaining (in frames) before a frozen bloon thaws. */
     protected int freezeTimer = 0;
+    /** The original (unfrozen) image of the bloon for later restoration. */
     protected GreenfootImage originalImage;
-    // temporary immunity tracker
+    /** Temporary immunities (e.g., during freeze effects). */
     private java.util.EnumMap<DamageType, Boolean> tempImmunities = new java.util.EnumMap<>(DamageType.class);
+    /** True if the bloon is currently performing a lane change. */
     protected boolean changingLane = false;
+    /** The Y-coordinate of the lane this bloon is moving toward. */
     protected int targetLaneY;
-    protected double laneChangeSpeed = 2.0; // pixels per frame
+    /** Speed of lane changes in pixels per frame. */
+    protected double laneChangeSpeed = 2.0; 
     
-    public void setTemporaryImmunity(DamageType type, boolean active) {
-        tempImmunities.put(type, active);
-    }
-    
+    /**
+     * Constructs a new {@code Bloon} instance.
+     *
+     * @param speed     movement speed in pixels per frame
+     * @param health    starting health of the bloon
+     * @param direction travel direction ({@code 1 = right}, {@code -1 = left})
+     * @param laneY     vertical lane position
+     * @param nextTier  the next-tier bloon class to spawn upon popping
+     */
     public Bloon(double speed, int health, int direction, int laneY, Class<? extends Bloon> nextTier) {
         this.speed = speed;
         this.health = health;
         this.direction = direction;
         this.laneY = laneY;
         this.nextTier = nextTier;
-        // Do not rotate bloons — just flip if moving left
         if (direction == -1) {
             GreenfootImage img = getImage();
             if (img != null) {
-                img.mirrorHorizontally(); // ✅ horizontal flip, not vertical
+                img.mirrorHorizontally(); 
                 setImage(img);
             }
         }
     
     }
     
+
+    /**
+     * Main update method — called once per frame.
+     * Handles freezing, movement, lane logic, collisions, and cleanup.
+     */
     @Override
     public void act() {
         if (frozen) {
             freezeTimer--;
             if (freezeTimer <= 0) {
                 frozen = false;
-                setTemporaryImmunity(DamageType.NORMAL, false); // remove lead-like immunity
+                setTemporaryImmunity(DamageType.NORMAL, false);
                 setImage(new GreenfootImage(originalImage)); 
                 updateImageDirection();
             } else {
-                return; // stay frozen
+                return; 
             }
         }
     
@@ -60,15 +96,17 @@ public abstract class Bloon extends SuperSmoothMover {
         checkCollisionWithMonkey();
         checkOutOfBounds();
     }
-    
+    /**
+     * Applies damage to this bloon based on the damage type.
+     *
+     * @param dmg  the amount of damage
+     * @param type the {@link DamageType} applied
+     */
     public void takeDamage(int dmg, DamageType type) {
-        // Check permanent immunity first
         if (isImmuneTo(type)) {
-            // Play a sound for hitting an immune bloon
             return;
         }
     
-        // Check temporary immunity
         Boolean tempImmune = tempImmunities.get(type);
         if (tempImmune != null && tempImmune) return;
     
@@ -76,7 +114,14 @@ public abstract class Bloon extends SuperSmoothMover {
         if (health <= 0) pop();
     }
     
-    
+    /**
+     * Handles what happens when a bloon is destroyed (popped).
+     * <p>
+     * - Spawns its child tier (if any).<br>
+     * - Transfers freeze effects if applicable.<br>
+     * - Plays pop visual effect and removes this object.
+     * </p>
+     */
     protected void pop() {
         World world = getWorld();
         if (world == null) return;
@@ -84,11 +129,9 @@ public abstract class Bloon extends SuperSmoothMover {
         int x = getX();
         int y = getY();
     
-        // Track whether this bloon was frozen before popping
         boolean wasFrozen = frozen;
         int remainingFreeze = freezeTimer;
     
-        // Spawn child tier if exists
         Class<? extends Bloon> child = getChildTier();
         if (child != null) {
             try {
@@ -97,7 +140,6 @@ public abstract class Bloon extends SuperSmoothMover {
                     .newInstance(direction, laneY);
                 world.addObject(next, x, y);
     
-                // ✅ If the parent was frozen, carry over the freeze to the child
                 if (wasFrozen && remainingFreeze > 0) {
                     next.applyFreeze(remainingFreeze);
                 }
@@ -106,17 +148,23 @@ public abstract class Bloon extends SuperSmoothMover {
             }
         }
     
-        // Pop visual and remove parent
         PopEffect pop = new PopEffect();
         world.addObject(pop, x, y);
         world.removeObject(this);
     }
     
-    /** Child tier class for next tier (override if needed) */
+    /**
+     * Returns the next-tier bloon type that should spawn when this one pops.
+     * Subclasses override this to define their child type.
+     *
+     * @return the class of the next-tier bloon, or {@code null} if none
+     */
     protected Class<? extends Bloon> getChildTier() {
-        return null; // default: last tier
+        return null; 
     }
-    
+    /**
+     * Checks and applies contact damage to monkeys.
+     */
     protected void checkCollisionWithMonkey() {
         Monkey monkey = (Monkey) getOneIntersectingObject(Monkey.class);
         if (monkey != null && contactCooldown == 0) {
@@ -125,7 +173,9 @@ public abstract class Bloon extends SuperSmoothMover {
         }
     }
     
-    /** Remove if out of world bounds */
+    /**
+     * Removes the bloon if it travels out of world bounds.
+     */
     protected void checkOutOfBounds() {
         if (getWorld() == null) return;
         if (getX() < 0 || getX() > getWorld().getWidth()) {
@@ -133,7 +183,12 @@ public abstract class Bloon extends SuperSmoothMover {
         }
     }
     
-    
+    /**
+     * Checks whether this bloon is immune to a given damage type.
+     *
+     * @param type the damage type to test
+     * @return {@code true} if this bloon is immune; {@code false} otherwise
+     */
     public boolean isImmuneTo(DamageType type) {
         if (this instanceof LeadBloon && (type != DamageType.EXPLOSIVE)) return true;
         if (this instanceof WhiteBloon && type == DamageType.ICE) return true;
@@ -143,6 +198,11 @@ public abstract class Bloon extends SuperSmoothMover {
         if (this instanceof PurpleBloon && type == DamageType.MAGIC) return true;
         return false;
     }
+    /**
+     * Freezes this bloon for a given duration.
+     *
+     * @param duration freeze duration in frames
+     */
     public void applyFreeze(int duration) {
         if (isImmuneTo(DamageType.ICE) || frozen) return;
     
@@ -158,6 +218,9 @@ public abstract class Bloon extends SuperSmoothMover {
         setImage(frozenImg);
     }
 
+    /**
+     * Restores the correct image orientation after thawing or direction change.
+     */
     protected void updateImageDirection() {
         if (originalImage == null) return;
         GreenfootImage img = new GreenfootImage(originalImage);
@@ -166,52 +229,62 @@ public abstract class Bloon extends SuperSmoothMover {
         }
         setImage(img);
     }
-    
+
+    /**
+     * Sets the bloon's travel direction and updates its image accordingly.
+     *
+     * @param newDirection the new direction ({@code 1 = right}, {@code -1 = left})
+     */    
     public void setDirection(int newDirection) {
         direction = newDirection;
         updateImageDirection();
     }
+    
+    /**
+     * Handles lane-following and lane-changing behavior when blocked.
+     */
     protected void handleTrafficLogic() {
         if (getWorld() == null) return;
     
-        // Detect bloons ahead in the same lane and direction
-        int lookAhead = 100; // distance ahead to check
+        int lookAhead = 100; 
         Bloon frontBloon = getBloonAhead(lookAhead);
     
         if (frontBloon != null && frontBloon != this) {
             if (frontBloon instanceof Moab) {
-                // Slow down to match front bloon's speed
                 this.speed = Math.max(frontBloon.speed, this.speed * 0.97);
     
-                // Attempt lane change if not already changing
                 if (!changingLane) tryLaneChange();
             } 
         } else {
-            // No one blocking us — return to normal speed
             this.speed = Math.abs(speed);
         }
     
-        // Smoothly move toward target lane if changing
         if (changingLane) {
             int dy = targetLaneY - getY();
             if (Math.abs(dy) < 2) {
-                changingLane = false; // reached new lane
+                changingLane = false; 
             } else {
                 setLocation(getX(), getY() + (int) Math.signum(dy) * laneChangeSpeed);
             }
         }
     }
-    
+    /**
+     * Returns the bloon directly ahead within a given look-ahead distance.
+     *
+     * @param distance distance ahead to check
+     * @return the bloon detected ahead, or {@code null} if none found
+     */   
     private Bloon getBloonAhead(int distance) {
         return (Bloon) getOneObjectAtOffset(direction * distance, 0, Bloon.class);
     }
-    
+    /**
+     * Attempts to change lanes to avoid slower traffic.
+     */    
     protected void tryLaneChange() {
         BloonWorld world = (BloonWorld) getWorld();
-        int[] lanes = world.getLanePositions(); // add getter in BloonWorld (see below)
+        int[] lanes = world.getLanePositions(); 
         int currentY = laneY;
     
-        // Find our lane index
         int currentLane = -1;
         for (int i = 0; i < lanes.length; i++) {
             if (Math.abs(lanes[i] - currentY) < 5) {
@@ -220,35 +293,36 @@ public abstract class Bloon extends SuperSmoothMover {
             }
         }
     
-        if (currentLane == -1) return; // couldn't find lane
+        if (currentLane == -1) return; 
     
-        // Check upward and downward lanes for free space
         int[] offsets = {-2, -1, 1, 2};
         for (int offset : offsets) {
             int newLane = currentLane + offset;
             if (newLane < 0 || newLane >= lanes.length) continue;
     
-            // Ensure lane goes in same direction
             boolean sameDirection = (newLane < 3 && direction == -1) || (newLane >= 3 && direction == 1);
             if (!sameDirection) continue;
     
-            // Check if lane is clear
             java.util.List<Bloon> laneBloons = world.getObjectsAt(getX(), lanes[newLane], Bloon.class);
             if (laneBloons.isEmpty()) {
-                // Begin smooth lane change
                 targetLaneY = lanes[newLane];
                 changingLane = true;
-                laneY = targetLaneY; // update logical lane
+                laneY = targetLaneY; 
                 return;
             }
         }
     }
-    /** Create a frozen (icy-blue) version of a given base image without changing flags/timers. */
+
+    /**
+     * Creates an icy-blue copy of a given image to visually represent a frozen bloon.
+     *
+     * @param base the base image to modify
+     * @return a new frozen-tinted {@link GreenfootImage}
+     */
     protected GreenfootImage makeFrozenCopy(GreenfootImage base) {
         if (base == null) return null;
         GreenfootImage frozenImg = new GreenfootImage(base);
-        Color freezeColor = new Color(100, 180, 255, 80); // same used before
-    
+        Color freezeColor = new Color(100, 180, 255, 80);     
         for (int x = 0; x < frozenImg.getWidth(); x++) {
             for (int y = 0; y < frozenImg.getHeight(); y++) {
                 Color pixel = frozenImg.getColorAt(x, y);
@@ -264,4 +338,13 @@ public abstract class Bloon extends SuperSmoothMover {
         return frozenImg;
     }
 
+    /**
+     * Assigns or removes a temporary immunity to this bloon.
+     *
+     * @param type   the damage type to modify
+     * @param active {@code true} to enable immunity, {@code false} to disable it
+     */
+    public void setTemporaryImmunity(DamageType type, boolean active) {
+        tempImmunities.put(type, active);
+    }
 }

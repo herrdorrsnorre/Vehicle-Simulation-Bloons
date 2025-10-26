@@ -1,11 +1,16 @@
 #BlueJ class context
 comment0.target=Projectile
+comment0.text=\r\n\ Represents\ a\ projectile\ fired\ by\ a\ {@link\ Monkey}\ toward\ a\ {@link\ Bloon}.\r\n\ <p>\r\n\ This\ abstract\ class\ provides\ base\ functionality\ for\ all\ projectiles\ in\ the\ game,\r\n\ including\ movement,\ target\ tracking,\ and\ collision\ detection.\ Subclasses\ can\r\n\ customize\ behavior\ by\ overriding\ {@link\ \#onHit(Bloon)}\ or\ by\ modifying\ speed,\r\n\ damage\ type,\ and\ pierce\ properties.\r\n\ </p>\r\n\r\n\ <h2>Features\:</h2>\r\n\ <ul>\r\n\ \ \ <li>Moves\ toward\ its\ assigned\ target\ each\ frame.</li>\r\n\ \ \ <li>Removes\ itself\ when\ colliding\ with\ a\ Bloon\ or\ leaving\ the\ world\ bounds.</li>\r\n\ \ \ <li>Prevents\ double-hit\ issues\ using\ an\ internal\ {@code\ hasHit}\ flag.</li>\r\n\ </ul>\r\n\r\n\ <p><b>Usage\:</b>\ Extend\ this\ class\ (e.g.\ {@code\ Dart},\ {@code\ SniperBullet},\ {@code\ FlameShot})\r\n\ and\ implement\ unique\ hit\ or\ visual\ effects\ via\ {@link\ \#onHit(Bloon)}.</p>\r\n
 comment1.params=source\ target
 comment1.target=Projectile(Monkey,\ Bloon)
+comment1.text=\r\n\ Constructs\ a\ projectile\ fired\ from\ a\ given\ source\ toward\ a\ target\ Bloon.\r\n\r\n\ @param\ source\ The\ {@link\ Monkey}\ that\ fired\ this\ projectile.\r\n\ @param\ target\ The\ {@link\ Bloon}\ that\ this\ projectile\ is\ intended\ to\ hit.\r\n
 comment2.params=world
 comment2.target=void\ addedToWorld(greenfoot.World)
+comment2.text=\r\n\ Called\ automatically\ when\ the\ projectile\ is\ added\ to\ the\ world.\r\n\ Stores\ a\ world\ reference\ and\ rotates\ the\ projectile\ toward\ its\ initial\ target.\r\n\r\n\ @param\ world\ The\ {@link\ World}\ this\ projectile\ was\ added\ to.\r\n
 comment3.params=
 comment3.target=void\ act()
+comment3.text=\r\n\ Called\ every\ frame\ to\ update\ projectile\ movement\ and\ handle\ collisions.\r\n\ <ul>\r\n\ \ \ <li>Tracks\ and\ faces\ its\ target\ if\ available.</li>\r\n\ \ \ <li>Moves\ forward\ at\ its\ defined\ speed.</li>\r\n\ \ \ <li>Checks\ for\ collisions\ with\ Bloons\ and\ removes\ itself\ when\ hitting\ or\ exiting\ the\ world.</li>\r\n\ </ul>\r\n
 comment4.params=
 comment4.target=void\ checkCollision()
+comment4.text=\r\n\ Checks\ for\ collisions\ with\ Bloons\ and\ applies\ damage\ if\ contact\ occurs.\r\n\ Prevents\ multiple\ hits\ using\ {@link\ \#hasHit}.\r\n
 numComments=5

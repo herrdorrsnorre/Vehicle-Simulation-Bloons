@@ -1,22 +1,38 @@
 import greenfoot.*;
 import java.util.ArrayList;
 import java.util.Collections;
+/**
+ * The {@code BloonWorld} class represents the main simulation environment for the Bloons-style game.
+ * <p>
+ * It manages:
+ * <ul>
+ *   <li>Bloon spawning logic (normal and MOAB)</li>
+ *   <li>Monkey spawning logic and timing</li>
+ *   <li>Lane preparation and visual rendering</li>
+ *   <li>Development testing tools (dev mode)</li>
+ *   <li>Random global effects (e.g. Ice Blast)</li>
+ *   <li>Z-sorting of actors for proper depth rendering</li>
+ * </ul>
+ *
+ * This class extends {@link World} and serves as the core game world where all
+ * gameplay and simulation activity occurs.
+ */
 
 public class BloonWorld extends World {
-    private static boolean assetsLoaded = false;
-
+    /** Base background image for the world. */
     private GreenfootImage background;
+    // --- Color definitions for map elements ---
     public static Color GREY_BORDER = new Color(108, 108, 108);
     public static Color GREY_PATH = new Color(120, 120, 120);
     public static Color SIDEWALK_COLOR = new Color(160, 160, 160);
-
+    // --- Lane configuration ---
     private int laneHeight = 64;
     private int laneCount = 6;
     private int spaceBetweenLanes = 6;
     private int[] lanePositionsY;
     private BloonSpawner[] laneSpawners;
     public static boolean SHOW_SPAWNERS = false;
-
+    // --- Spawn timing variables ---
     private int spawnTimer = 0;
     private int simulationTime = 0;
     private static final int BASE_MONKEY_INTERVAL = 80;
@@ -24,21 +40,24 @@ public class BloonWorld extends World {
     private int[] laneSpawnTimers = new int[laneCount];
     private int monkeySpawnTimer = 0;
     private int bloonSpawnTimer = 0;
-
+    // --- Sidewalk boundaries ---
     private int sidewalkTopStart;
     private int sidewalkTopEnd;
     private int sidewalkBottomStart;
     private int sidewalkBottomEnd;
 
     // --- Developer testing features ---
-    private boolean devMode = false;  // toggle developer mode
+    private boolean devMode = false; 
     private Class<? extends Bloon> devBloon1;
     private Class<? extends Bloon> devBloon2;
-    private Class<? extends Monkey> devMonkey; // type of monkey to spawn
-
+    private Class<? extends Monkey> devMonkey; 
+    // --- Random event timers ---    
     private int iceBlastTimer = 0;
     private boolean iceBlastActive = false;
-
+    /**
+     * Constructs the {@code BloonWorld}, initializes the background,
+     * prepares lane and sidewalk graphics, and sets up spawners.
+     */
     public BloonWorld() {
         super(1024, 800, 1, false);
 
@@ -59,12 +78,24 @@ public class BloonWorld extends World {
         sidewalkBottomEnd = sidewalkBottomStart + 80;
         //enableDevMode(CeramicBloon.class, PinkBloon.class, IceMonkey.class);
     }
+    /**
+     * Enables developer mode, which spawns custom bloons and monkeys for testing.
+     *
+     * @param bloonType1 first bloon class to spawn
+     * @param bloonType2 second bloon class to spawn
+     * @param monkeyType monkey class to spawn
+     */    
     public void enableDevMode(Class<? extends Bloon> bloonType1, Class<? extends Bloon> bloonType2, Class<? extends Monkey> monkeyType) {
         devMode = true;
         devBloon1 = bloonType1;
         devBloon2 = bloonType2;
         devMonkey = monkeyType;
     }
+    
+    /**
+     * Main update loop executed once per frame.
+     * Handles spawning, random events, and sorting.
+     */
     public void act() {
         simulationTime++;
         spawnBloons();
@@ -72,14 +103,21 @@ public class BloonWorld extends World {
         triggerRandomIceBlast();
         zSort((ArrayList<Actor>) getObjects(Actor.class), this);
     }
+    /**
+     * Handles all bloon spawning logic, including:
+     * <ul>
+     *   <li>Developer test bloon spawning</li>
+     *   <li>Normal bloon tier progression</li>
+     *   <li>MOAB spawn frequency scaling</li>
+     * </ul>
+     */
     private void spawnBloons() {
-        // --- DEV MODE ---
+        //--- Dev Mode ---
         if (devMode && (devBloon1 != null || devBloon2 != null)) {
             bloonSpawnTimer++;
             if (bloonSpawnTimer < BASE_BLOON_INTERVAL) return;
             bloonSpawnTimer = 0;
     
-            // Spawn dev bloons in ALL lanes
             for (int lane = 0; lane < laneCount; lane++) {
                 BloonSpawner spawner = laneSpawners[lane];
                 int direction = (lane < 3) ? -1 : 1;
@@ -102,17 +140,15 @@ public class BloonWorld extends World {
             return;
         }
     
-        // --- NORMAL SPAWNING ---
+        // --- Normal Spawns ---
         simulationTime++;
     
-        // --- MOAB SPAWN HANDLING ---
+        // --- Moab Spawns ---
         int currentMoabs = getObjects(Moab.class).size();
     
-        // Max allowed MOABs increases slowly over time
-        int maxMoabs = 1 + (simulationTime / 8000); // +1 every 8000 ticks
-        if (maxMoabs > 5) maxMoabs = 5; // hard cap, optional
+        int maxMoabs = 1 + (simulationTime / 8000); 
+        if (maxMoabs > 5) maxMoabs = 5; 
     
-        // Base rarity decreases over time (more frequent MOABs)
         int baseChance = 1000;
         int moabChance = Math.max(200, baseChance - (simulationTime / 2000) * 100);
     
@@ -126,12 +162,11 @@ public class BloonWorld extends World {
             int startX = (direction == 1) ? 1 : getWidth() - 1;
     
             addObject(new Moab(direction, spawner.getY()), startX, spawner.getY());
-            return; // stop other spawns this frame
+            return; 
         }
     
-        // --- NORMAL BLOON SPAWNING ---
-        // Reduce normal spawns if multiple MOABs exist
-        int bloonSpawnChance = 2 - Math.min(currentMoabs, 1); // halve rate when moabs exist
+        // --- Small Bloon Spawns ---
+        int bloonSpawnChance = 2 - Math.min(currentMoabs, 1); 
         bloonSpawnChance = Math.max(1, bloonSpawnChance);
     
         for (int lane = 0; lane < laneCount; lane++) {
@@ -153,7 +188,7 @@ public class BloonWorld extends World {
                     else if (simulationTime < 5400) { for (int i = 0; i <= 8; i++) allowedTiers.add(i); }
                     else if (simulationTime < 6000) { for (int i = 0; i <= 10; i++) allowedTiers.add(i); }
                     else if (simulationTime < 6400) { for (int i = 0; i <= 11; i++) allowedTiers.add(i); }
-                    else { for (int i = 0; i <= 12; i++) allowedTiers.add(i); } // ✅ Always include at least tier 12 (MOABs and below)
+                    else { for (int i = 0; i <= 12; i++) allowedTiers.add(i); }
                     
                         
                     int bloonType = allowedTiers.get(Greenfoot.getRandomNumber(allowedTiers.size()));
@@ -185,7 +220,10 @@ public class BloonWorld extends World {
     }
 
 
-    // --- Spawn Monkeys ---
+    /**
+     * Handles automatic spawning of monkeys at dynamic intervals.
+     * The spawn rate and type of monkey depend on the current simulation phase.
+     */    
     private void spawnMonkeys() {
         monkeySpawnTimer++;
 
@@ -246,7 +284,12 @@ public class BloonWorld extends World {
         }
         addMonkey(m);
     }
-
+    /**
+     * Adds a monkey actor to the world at a random sidewalk spawn position.
+     * Monkeys traverse vertically across the map and despawn at the opposite sidewalk.
+     *
+     * @param m the monkey to add
+     */
     private void addMonkey(Monkey m) {
         boolean spawnAtTop = Greenfoot.getRandomNumber(2) == 0;
 
@@ -268,25 +311,31 @@ public class BloonWorld extends World {
         m.setDespawnY(yDespawn);
     }
 
-    
-    
-    // Lane preparation with textured sidewalks
+    /**
+     * Prepares and draws all lanes and sidewalks with visual texture.
+     *
+     * @param world         reference to this {@link World}
+     * @param target        target image to draw the lanes on
+     * @param spawners      array to store lane {@link BloonSpawner}s
+     * @param startY        Y-coordinate for the top of the first lane
+     * @param heightPerLane height of each lane
+     * @param lanes         total number of lanes
+     * @param spacing       pixel spacing between lanes
+     * @return array of Y-coordinates for each lane center
+     */    
     public int[] prepareLanes(World world, GreenfootImage target, BloonSpawner[] spawners,
                                int startY, int heightPerLane, int lanes, int spacing) {
         int[] lanePositions = new int[lanes];
         int heightOffset = heightPerLane / 2;
     
-        // --- Adjustable constants ---
-        int sidewalkThickness = 80; // thicker sidewalks
+        int sidewalkThickness = 80; 
         Color SIDEWALK_BASE = new Color(160, 160, 160);
         Color SIDEWALK_LINE = new Color(140, 140, 140);
         Color SIDEWALK_CRACK = new Color(120, 120, 120);
     
-        // --- Draw top textured sidewalk ---
         target.setColor(SIDEWALK_BASE);
         target.fillRect(0, startY - sidewalkThickness, target.getWidth(), sidewalkThickness);
     
-        // Add light texture (lines/cracks)
         target.setColor(SIDEWALK_LINE);
         for (int x = 0; x < target.getWidth(); x += 60) {
             target.fillRect(x, startY - sidewalkThickness, 2, sidewalkThickness);
@@ -299,7 +348,6 @@ public class BloonWorld extends World {
             target.fillRect(x, startY - sidewalkThickness + 10, 1, 20);
         }
     
-        // --- Draw lanes + dividers ---
         target.setColor(GREY_BORDER);
         target.fillRect(0, startY, target.getWidth(), spacing);
     
@@ -312,7 +360,6 @@ public class BloonWorld extends World {
             spawners[i] = new BloonSpawner(heightPerLane, i);
             world.addObject(spawners[i], 0, lanePositions[i]);
     
-            // Dashed dividers between lanes
             if (i > 0) {
                 for (int j = 0; j < target.getWidth(); j += 120) {
                     target.setColor(Color.WHITE);
@@ -321,7 +368,6 @@ public class BloonWorld extends World {
             }
         }
     
-        // --- Draw bottom textured sidewalk ---
         int lastLaneBottom = lanePositions[lanes - 1] + heightOffset + spacing;
         target.setColor(SIDEWALK_BASE);
         target.fillRect(0, lastLaneBottom, target.getWidth(), sidewalkThickness);
@@ -338,15 +384,12 @@ public class BloonWorld extends World {
             target.fillRect(x, lastLaneBottom + 10, 1, 20);
         }
     
-        // Border above and below roads
         target.setColor(GREY_BORDER);
         target.fillRect(0, startY - 3, target.getWidth(), 6);
         target.fillRect(0, lastLaneBottom - spacing, target.getWidth(), 6);
     
         return lanePositions;
     }
-    
-    
     
     /**
      * Z-sort so actors with higher Y (lower on screen) render in front.
@@ -427,23 +470,22 @@ public class BloonWorld extends World {
     private static int roundAwayFromZero(double v) {
         return (int)(v + Math.signum(v) * 0.5);
     }
+    
+    /** @return Y-coordinates of all lane centers */
     public int[] getLanePositions() {
         return lanePositionsY;
     }
     /**
-     * Occasionally triggers a fullscreen ice blast effect.
+     * Occasionally triggers a fullscreen {@link IceBlastEffect}.
+     * Controlled by a cooldown timer and low random chance.
      */
     private void triggerRandomIceBlast() {
-        // Don't spam — wait a while between possible triggers
         iceBlastTimer++;
     
-        // Only check every few seconds of simulation time
-        if (iceBlastTimer < 600) return; // roughly 10 seconds if act() runs 60fps
+        if (iceBlastTimer < 600) return; 
     
-        // Reset timer when something happens or after long time
-        if (iceBlastTimer > 3000) iceBlastTimer = 600; // reset cooldown if nothing triggered
+        if (iceBlastTimer > 3000) iceBlastTimer = 600; 
     
-        // Very small random chance per frame
         if (!iceBlastActive && Greenfoot.getRandomNumber(1000) == 0) {
             iceBlastActive = true;
             iceBlastTimer = 0;

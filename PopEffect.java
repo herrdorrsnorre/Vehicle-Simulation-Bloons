@@ -22,7 +22,7 @@ public class PopEffect extends Actor
     @Override
     public void act() {
         timer++;
-        if (timer > 5) { // stays for 10 frames (~0.16s at 60fps)
+        if (timer > 5) { 
             if (getWorld() != null) {
                 getWorld().removeObject(this);
             }

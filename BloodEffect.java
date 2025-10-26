@@ -4,11 +4,10 @@ public class BloodEffect extends Actor {
     private static final int FRAME_COUNT = 15;
     private GreenfootImage[] frames = new GreenfootImage[FRAME_COUNT];
     private int currentFrame = 0;
-    private int frameDelay = 2; // higher = slower animation
+    private int frameDelay = 2;
     private int delayCounter = 0;
 
     public BloodEffect() {
-        // Load images named blood1.png to blood15.png
         for (int i = 0; i < FRAME_COUNT; i++) {
             frames[i] = new GreenfootImage("blood/Blood" + (i + 1) + ".png");
         }
@@ -32,7 +31,7 @@ public class BloodEffect extends Actor {
             if (currentFrame < FRAME_COUNT) {
                 setImage(frames[currentFrame]);
             } else if (getWorld() != null) {
-                getWorld().removeObject(this); // remove when done
+                getWorld().removeObject(this); 
             }
         }
     }

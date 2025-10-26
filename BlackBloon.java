@@ -1,10 +1,10 @@
 import greenfoot.*;
 
 public class BlackBloon extends Bloon {
-    private static final double SPEED = 1.8; // constant speed
+    private static final double SPEED = 1.8; 
 
     public BlackBloon(int direction, int laneY) {
-        super(SPEED, 1, direction, laneY, null); // direction = 1, nextTier handled by getChildTier
+        super(SPEED, 1, direction, laneY, null);
         GreenfootImage bloon = new GreenfootImage("Black_Bloon.png");
         bloon.scale(36, 48);
         setImage(bloon);

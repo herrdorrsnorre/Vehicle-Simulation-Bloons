@@ -1,9 +1,13 @@
 #BlueJ class context
 comment0.target=BombProjectile
+comment0.text=\r\n\ Represents\ a\ bomb\ projectile\ fired\ by\ a\ tower.\r\n\ <p>\r\n\ When\ the\ bomb\ collides\ with\ a\ bloon,\ it\ creates\ an\ explosion\ that\r\n\ damages\ all\ nearby\ bloons\ within\ a\ specified\ radius.\ The\ explosion\r\n\ also\ creates\ a\ visual\ and\ sound\ effect\ via\ {@link\ ExplosionEffect}.\r\n\ </p>\r\n
 comment1.params=source\ target
 comment1.target=BombProjectile(Monkey,\ Bloon)
+comment1.text=\r\n\ Constructs\ a\ new\ {@code\ BombProjectile}\ originating\ from\ the\ given\ source\ tower\r\n\ and\ targeting\ the\ specified\ bloon.\r\n\r\n\ @param\ source\ the\ tower\ (monkey)\ that\ fired\ this\ projectile\r\n\ @param\ target\ the\ bloon\ this\ projectile\ is\ homing\ toward\r\n
 comment2.params=
 comment2.target=void\ checkCollision()
+comment2.text=\r\n\ Checks\ for\ collision\ with\ any\ bloon.\ If\ a\ collision\ occurs,\ the\ projectile\r\n\ detonates\ and\ triggers\ an\ explosion\ effect.\r\n
 comment3.params=
 comment3.target=void\ explode()
+comment3.text=\r\n\ Handles\ the\ explosion\ effect\ and\ area-of-effect\ (AOE)\ damage\ to\ bloons.\r\n\ <p>\r\n\ -\ Damages\ all\ bloons\ within\ the\ explosion\ radius\ that\ are\ not\ immune\ to\ {@code\ EXPLOSIVE}\ damage.<br>\r\n\ -\ Spawns\ a\ corresponding\ {@link\ ExplosionEffect}\ at\ the\ impact\ location.<br>\r\n\ -\ Removes\ the\ projectile\ from\ the\ world\ afterward.\r\n\ </p>\r\n
 numComments=4
