@@ -1,5 +1,6 @@
 import greenfoot.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collections;
 /*
   Overview:
@@ -13,6 +14,7 @@ import java.util.Collections;
   Certain bloons will spawn multiple children on death. Certain bloons have more than 1 health before dying. 
   Different bloons will deal more damage to monkeys upon contact
   Bloons are all cabable of running past each other howver the biggest bloon here the Moab cannot be run past and bloons will lane change to go around it. 
+  Futhermore occasionally a full screen ice blast will freeze every bloon on screen. Frozen Bloons will have the immunities of a lead bloon for the duration. 
   Credits: 
       Sounds:
         https://www.youtube.com/@crashbandicoot1352/videos (PurpleBloonsound, LeadBloonSound, CeramicBloonSound)
@@ -33,7 +35,7 @@ import java.util.Collections;
         stock images of magic and bomb
         https://bloons.fandom.com/wiki/Massive_Ornary_Air_Blimp_(MOAB)/Gallery (taken but modified with this tool https://giventofly.github.io/pixelit/#tryit)
 
-I have also used ChatGPT to write the documentation comments, and to write the code to draw the background image        
+    I have also used ChatGPT to write the documentation comments, and to write the code to draw the background image        
 */
 /**
  * The {@code BloonWorld} class represents the main simulation environment for the Bloons-style game.
@@ -135,6 +137,7 @@ public class BloonWorld extends World {
         spawnBloons();
         spawnMonkeys();
         triggerRandomIceBlast();
+        cleanupObjects();
         zSort((ArrayList<Actor>) getObjects(Actor.class), this);
     }
     /**
@@ -529,6 +532,44 @@ public class BloonWorld extends World {
             addObject(blast, getWidth() / 2, getHeight() / 2);
     
             iceBlastActive = false;
+        }
+    }
+    /**
+     * Periodically removes off-screen or invalid objects to prevent memory buildup
+     * and slowdown during long simulations.
+     * <p>
+     * This method runs every few seconds (based on {@code simulationTime})
+     * and checks all {@link Actor} instances currently in the world.
+     * Any actor that is far outside the visible area or detached from the world
+     * will be removed automatically.
+     */
+    private void cleanupObjects() {
+        // Run every ~5 seconds (at 60 FPS this is 300 frames)
+        if (simulationTime % 300 != 0) return;
+    
+        // Define safe boundaries slightly beyond the world edges
+        int minX = -200;
+        int maxX = getWidth() + 200;
+        int minY = -200;
+        int maxY = getHeight() + 200;
+    
+        List<Actor> all = getObjects(Actor.class);
+        for (Actor a : all) {
+            if (a == null) continue;
+    
+            // Remove if actor somehow lost its world reference
+            if (a.getWorld() == null) {
+                removeObject(a);
+                continue;
+            }
+    
+            int x = a.getX();
+            int y = a.getY();
+    
+            // Remove if far off-screen (helps prevent buildup of old projectiles or effects)
+            if (x < minX || x > maxX || y < minY || y > maxY) {
+                removeObject(a);
+            }
         }
     }
 }
